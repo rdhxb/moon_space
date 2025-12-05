@@ -1,4 +1,5 @@
 import pygame
+from ..world.world_map import WorldMap
 
 
 class Ship():
@@ -23,9 +24,13 @@ class Ship():
         self.rect.centerx = int(self.x)
         self.rect.centery = int(self.y)
 
+
+
     def update(self):
         self.handle_input()
         self.update_rect()
+
+
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
