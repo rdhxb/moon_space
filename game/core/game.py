@@ -3,7 +3,7 @@ from ..entities.ship import Ship
 from ..world.world_map import WorldMap
 from ..render.TileSet import TileSet
 from ..render.iso_render import IsoRender
-
+from ..render.camera import Camera
 pygame.init()
 
 class Game():
@@ -19,12 +19,12 @@ class Game():
         self.running = True
         self.color = (0,0,0)
 
-
-        self.world = WorldMap()
         self.player = Ship(self.width/2, self.height/2)
+        self.world = WorldMap()
         self.tile_set = TileSet()
-        # self.camera = Camera()
-        self.renderer = IsoRender()
+        self.camera = Camera()
+        self.renderer = IsoRender(self.world,self.camera, self.tile_set)
+
 
     # draw everything on the screen like player world ect. 
     def draw(self):
@@ -42,11 +42,11 @@ class Game():
             if event.type == pygame.QUIT:
                 self.running = False
 
+
     # upted the game like player world camera ect 
     def update(self):
         self.player.update()
-        # self.camera.follow(self.player)
-        self.clock.tick(self.FPS)
+        dt = self.clock.tick(self.FPS)
         pass
 
     # run the game just a funct
@@ -56,10 +56,3 @@ class Game():
             self.handle_events()
             self.update()
             self.draw()
-
-
-
-            
-
-        
-            

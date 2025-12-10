@@ -1,16 +1,14 @@
 import pygame
-from ..world.world_map import WorldMap
-from ..render.TileSet import TileSet
-
 class IsoRender():
-    def __init__(self):
-        self.world = WorldMap()
-        self.tile_set = TileSet()
+    def __init__(self, world, camera, tile_set):
+        # self.world = WorldMap()
+        # self.tile_set = TileSet()
+        self.world = world
+        self.camera = camera
+        self.tile_set = tile_set
 
         self.tile_w = 32
         self.tile_h = 16
-
-        self.offset_x, self.offset_y = 1920 // 2, 1080 // 2
 
     def tile_to_screen(self, tx, ty):
         half_w = self.tile_w //2
@@ -20,8 +18,8 @@ class IsoRender():
         sx = (tx - ty) * half_w
         sy = (tx + ty) * half_h
 
-        sx += self.offset_x
-        sy += self.offset_y
+        sx += self.camera.offset_x
+        sy += self.camera.offset_y
 
         return (sx, sy)
         
