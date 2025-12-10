@@ -44,15 +44,27 @@ class Game():
 
 
     # upted the game like player world camera ect 
-    def update(self):
+    def update(self, dt):
         self.player.update()
-        dt = self.clock.tick(self.FPS)
-        pass
+        dx = 0
+        dy = 0
+        
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RIGHT]:
+            dx += self.camera.camera_speed * dt 
+        if keys[pygame.K_LEFT]:
+            dx -= self.camera.camera_speed * dt 
+        if keys[pygame.K_UP]:
+            dy -= self.camera.camera_speed * dt 
+        if keys[pygame.K_DOWN]:
+            dy += self.camera.camera_speed * dt 
+
+        self.camera.move(dx,dy)
 
     # run the game just a funct
     def run(self):
         while self.running:
-            
+            dt = self.clock.tick(self.FPS) / 1000
             self.handle_events()
-            self.update()
+            self.update(dt)
             self.draw()
