@@ -40,3 +40,18 @@ class IsoRender():
                 sx, sy = self.tile_to_screen(tx, ty)
                 screen.blit(surface_tile, (sx, sy))
 
+            
+        # print(self.world.trees)
+        # trees
+        for (tx, ty) in self.world.trees:
+            sx, sy = self.tile_to_screen(tx, ty)
+
+            tree_img = self.tile_set.tree_image
+            tree_w = self.tile_set.tree_rect.width
+            tree_h = self.tile_set.tree_rect.height
+
+            draw_x = sx - tree_w // 2
+            draw_y = sy - (tree_h - self.tile_h)
+
+            screen.blit(tree_img, (draw_x, draw_y))
+

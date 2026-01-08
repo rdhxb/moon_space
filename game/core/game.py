@@ -30,6 +30,8 @@ class Game():
         self.camera = Camera()
         self.renderer = IsoRender(self.world,self.camera, self.tile_set)
 
+        self.tree = self.world.create_tree()
+
 
     # draw everything on the screen like player world ect. 
     def draw(self):
@@ -50,10 +52,11 @@ class Game():
 
     # upted the game like player world camera ect 
     def update(self, dt):
-        self.player.update()
+        self.player.update(dt,self.world)
 
         iso_x, iso_y = self.player.get_iso_pos(self.renderer.tile_w, self.renderer.tile_h)
         self.camera.center_on(iso_x, iso_y, self.width, self.height)
+
 
         dx = 0
         dy = 0
@@ -69,6 +72,7 @@ class Game():
             dy += self.camera.camera_speed * dt 
 
         self.camera.move(dx,dy)
+
 
     # run the game just a funct
     def run(self):

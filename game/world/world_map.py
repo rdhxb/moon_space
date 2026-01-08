@@ -1,5 +1,5 @@
 import pygame
-
+from random import choice
 
 class WorldMap():
     def __init__(self):
@@ -32,6 +32,7 @@ class WorldMap():
 
         self.height_in_tiles = len(self.tile_data)
         self.width_in_tiles = len(self.tile_data[0])
+        self.trees = []
 
 
     def get_tile(self, tx, ty):
@@ -41,4 +42,14 @@ class WorldMap():
 
         return self.tile_data[ty][tx]
 
-
+    def create_tree(self):
+        self.free_tiles = []
+        for ty in range(0,self.height_in_tiles - 1):
+            for tx in range(0,self.width_in_tiles - 1):
+                if self.tile_data[ty][tx] == 0:
+                    self.free_tiles.append((tx,ty))
+        
+        # print(self.free_tiles)
+        for _ in range(5):
+            self.trees.append(choice(self.free_tiles))
+        # print(self.trees)

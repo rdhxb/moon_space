@@ -9,11 +9,16 @@ class TileSet():
         self.file_name_floor = 'game/data/assets/moon_floor.png'
         self.file_name_wall = 'game/data/assets/moon_wall.png'
 
+
         self.image_floor = pygame.image.load(self.file_name_floor).convert_alpha()
         self.image_wall = pygame.image.load(self.file_name_wall).convert_alpha()
+        self.tree_image = pygame.image.load("game/data/assets/tree.png").convert_alpha()
+
 
         self.rect_floor = self.image_floor.get_rect()
         self.rect_wall = self.image_wall.get_rect()
+        self.tree_rect = self.tree_image.get_rect()
+
 
         self.tiles = {
             0: self.image_floor.subsurface(64,0,self.tile_width,self.tile_floor_height),
