@@ -66,4 +66,3 @@ class WorldMap():
 
         for _ in range(5):
             self.trees.append(choice(self.free_tiles))
-            print(f'Trees on {choice(self.free_tiles)}')

@@ -7,11 +7,11 @@ class IsoRender():
 
         self.tile_w = 32
         self.tile_h = 16
-        self.base_pos = (15, 15) 
+        self.base_pos = self.world.base_pos
 
         base_original = self.tile_set.base_img
         bw, bh = base_original.get_size()
-        scale = 0.5
+        scale = 0.2
         bw2 = int(bw * scale)
         bh2 = int(bh * scale)
         self.base_img_small = pygame.transform.smoothscale(base_original, (bw2, bh2))
@@ -118,40 +118,74 @@ class IsoRender():
             screen.blit(tile_to_draw, (draw_x, draw_y))
 
 
-    def draw_base(self,screen: pygame.Surface):
+    def draw_base(self, screen: pygame.Surface):
         screen_w, screen_h = screen.get_size()
-        cx, cy = screen_w // 2, screen_h // 2 
-        zoom = self.camera.zoom
+        cx, cy = screen_w // 2, screen_h // 2
+        z = self.camera.zoom
 
+        tx, ty = self.world.base_pos
 
-        # ni wiem ale dziala trzeba bo obrazek za duzy skalowany potem zoomowany jakis cyrk moze wroce internet nie wie a ja taki madry to nie jestem :)
-        anchor_x = 50
-        anchor_y = 200
+        sx, sy = self.tile_to_screen(tx, ty)
 
+        # 3) zoom pozycji wokół środka ekranu 
+        sxz = cx + (sx - cx) * z
+        syz = cy + (sy - cy) * z
 
-        tx ,ty = self.base_pos
-        sx, sy = self.tile_to_screen(tx, ty) 
-
+        # 4) pivot sprite'a w pikselach
         base_img = self.base_img_small
-        base_w = self.base_rect_small.width
-        base_h = self.base_rect_small.height
+        bw, bh = base_img.get_size()
 
-        # przesunięcie względem środka ekranu
-        dx = sx - cx
-        dy = sy - cy
+        pivot_x = bw / 2
+        pivot_y = bh - self.tile_h   
 
-        # skalowanie odległości od środka 
-        sx_zoom = cx + dx * zoom
-        sy_zoom = cy + dy * zoom
-
-
-        offset_x = (anchor_x) * zoom
-        offset_y = (base_h - anchor_y) * zoom
-
-        draw_x = sx_zoom - offset_x
-        draw_y = sy_zoom - offset_y
         
-        self.base_screen_pos = (sx_zoom,sy_zoom - 10)
+        if z != 1.0:
+            draw_w = int(bw * z)
+            draw_h = int(bh * z)
+            img = pygame.transform.smoothscale(base_img, (draw_w, draw_h))
+            pivot_xz = pivot_x * z
+            pivot_yz = pivot_y * z
+        else:
+            img = base_img
+            pivot_xz = pivot_x
+            pivot_yz = pivot_y
 
-        screen.blit(base_img, (draw_x, draw_y))
         
+        draw_x = sxz - pivot_xz
+        draw_y = syz - pivot_yz
+
+        screen.blit(img, (draw_x, draw_y))
+
+        
+        self.base_screen_pos = (sxz, syz)
+        self.base_draw_rect = pygame.Rect(draw_x, draw_y, img.get_width(), img.get_height())
+
+        
+
+
+    def draw_base_hint(self, screen, font, text):
+        if not hasattr(self, "base_draw_rect") or self.base_draw_rect is None:
+            return
+
+        r = self.base_draw_rect
+
+        # tekst
+        surf = font.render(text, True, (255, 255, 255))
+
+        # pozycja: środek nad bazą
+        margin = 8
+        x = int(r.centerx - surf.get_width() / 2)
+        y = int(r.top - surf.get_height() - margin)
+
+        # clamp do ekranu (żeby nie ucinało przy krawędziach)
+        sw, sh = screen.get_size()
+        x = max(8, min(x, sw - surf.get_width() - 8))
+        y = max(8, min(y, sh - surf.get_height() - 8))
+
+        # tło półprzezroczyste
+        pad = 8
+        bg = pygame.Surface((surf.get_width() + 2*pad, surf.get_height() + 2*pad), pygame.SRCALPHA)
+        bg.fill((0, 0, 0, 40))
+
+        screen.blit(bg, (x - pad, y - pad))
+        screen.blit(surf, (x, y))

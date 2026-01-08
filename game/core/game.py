@@ -4,6 +4,8 @@ from ..world.world_map import WorldMap
 from ..render.TileSet import TileSet
 from ..render.iso_render import IsoRender
 from ..render.camera import Camera
+from ..ui.hud import HUD
+from ..data.items import validate_items
 pygame.init()
 
 class Game():
@@ -18,7 +20,7 @@ class Game():
 
         self.running = True
         self.color = (0,0,0)
-
+        validate_items()
 
 
         self.world = WorldMap()
@@ -31,10 +33,11 @@ class Game():
         self.renderer = IsoRender(self.world,self.camera, self.tile_set)
 
         self.game_state = 'play'
-        self.near_base = 'False'
+        self.near_base = False
         self.base_interaction_radius = 2.5
 
         self.font = pygame.font.SysFont('None', 24)
+        self.hud = HUD(self.renderer, self.font)
 
         
 
@@ -47,6 +50,7 @@ class Game():
         
         self.renderer.draw_base(self.screen)
         self.renderer.draw_trees(self.screen)
+        self.hud.draw(self.screen, self.game_state, self.near_base)
 
         pygame.display.flip()
         
@@ -83,18 +87,18 @@ class Game():
 
         elif self.game_state == 'base_menu':
             # logika do bazy po wcisnieciu E
-            print('Enterint base menu to make moves in base ->><<-')
+            # print('Enterint base menu to make moves in base ->><<-')
             pass
 
     def is_near_base(self):
         base_tx, base_ty = self.world.base_pos
-        px,py = self.player.tile_x, self.player.tile_y
+        px,py = self.player.tx, self.player.ty
 
-        dx = px - base_tx -  1
-        dy = py - base_ty - 2
+        dx = px - base_tx 
+        dy = py - base_ty
 
         self.near_base = (abs(dx) <= self.base_interaction_radius) and (abs(dy) <= self.base_interaction_radius)
-        print(f'self near base var -> {self.near_base} base_tx -> {base_tx} base_ty -> {base_ty} player_x -> {px} player_y -> {py}')
+        # print(f'self near base var -> {self.near_base} base_tx -> {base_tx} base_ty -> {base_ty} player_x -> {px} player_y -> {py}')
 
 
     # run the game just a funct
