@@ -9,7 +9,7 @@ pygame.init()
 class Game():
     # init the variables 
     def __init__(self):
-        self.width = 1920   
+        self.width = 1920     
         self.height = 1080
         self.screen = pygame.display.set_mode((self.width, self.height))
 
@@ -19,8 +19,13 @@ class Game():
         self.running = True
         self.color = (0,0,0)
 
-        self.player = Ship(self.width/2, self.height/2)
+
+
         self.world = WorldMap()
+
+        cx = self.world.width_in_tiles  / 2
+        cy = self.world.height_in_tiles / 2
+        self.player = Ship(cx, cy)
         self.tile_set = TileSet()
         self.camera = Camera()
         self.renderer = IsoRender(self.world,self.camera, self.tile_set)
@@ -46,6 +51,10 @@ class Game():
     # upted the game like player world camera ect 
     def update(self, dt):
         self.player.update()
+
+        iso_x, iso_y = self.player.get_iso_pos(self.renderer.tile_w, self.renderer.tile_h)
+        self.camera.center_on(iso_x, iso_y, self.width, self.height)
+
         dx = 0
         dy = 0
         

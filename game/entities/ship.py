@@ -6,29 +6,21 @@ class Ship():
     # init the variables 
     def __init__(self,x,y):
 
-        self.x = x
-        self.y = y
+        self.tx = x
+        self.ty = y
 
-        self.width = 32
-        self.height = 32
+        self.width = 16
+        self.height = 16
 
-        self.speed = 4
+        self.speed = 0.1
         self.color = (255,0,255)
 
         self.rect = pygame.Rect(0,0,self.width,self.height)
-        self.update_rect()
-
-
-    # set rect on the right pos 
-    def update_rect(self):
-        self.rect.centerx = int(self.x)
-        self.rect.centery = int(self.y)
 
 
 
     def update(self):
         self.handle_input()
-        self.update_rect()
 
 
 
@@ -36,22 +28,29 @@ class Ship():
         keys = pygame.key.get_pressed()
         # top bottom movement based on speed
         if keys[pygame.K_w]:
-            self.y -= self.speed
+            self.ty -= self.speed
+            print(self.tx,self.ty)
         if keys[pygame.K_s]:
-            self.y += self.speed
+            self.ty += self.speed
         # lef right movement based on speed  
         if keys[pygame.K_a]:
-            self.x -= self.speed
+            self.tx -= self.speed
         if keys[pygame.K_d]:
-            self.x += self.speed
+            self.tx += self.speed
 
     # drawing ship on the screen based on x and y 
     def draw(self, surface : pygame.Surface):
-        draw_x = self.rect.x
-        draw_y = self.rect.y
-
+        screen_w, screen_h = surface.get_size()
+        draw_x = screen_w // 2 - self.width // 2
+        draw_y = screen_h // 2 - self.height // 2
         pygame.draw.rect(surface, self.color, (draw_x, draw_y, self.width, self.height))
 
+
+    def get_iso_pos(self,tile_w,tile_h):
+        iso_x = (self.tx - self.ty) * (tile_w // 2)
+        iso_y = (self.tx + self.ty) * (tile_h // 2)
+
+        return iso_x , iso_y
 
 
 
