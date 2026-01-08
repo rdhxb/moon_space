@@ -30,6 +30,12 @@ class Game():
         self.camera = Camera()
         self.renderer = IsoRender(self.world,self.camera, self.tile_set)
 
+        self.game_state = 'play'
+        self.near_base = 'False'
+        self.base_interaction_radius = 2.5
+
+        self.font = pygame.font.SysFont('None', 24)
+
         
 
 
@@ -51,29 +57,44 @@ class Game():
             if event.type == pygame.QUIT:
                 self.running = False
 
+            if event.type == pygame.KEYDOWN:
+                if self.game_state == 'play':
+                    if event.key == pygame.K_e and self.near_base:
+                        self.game_state = 'base_menu'
+                        print('Enter base menu')
+                
+                elif self.game_state == 'base_menu':
+                    if event.key == pygame.K_e and self.near_base:
+                        self.game_state = 'play'
+                        print('Exit base menu enter play ')
+
+                
+
 
     # upted the game like player world camera ect 
     def update(self, dt):
-        self.player.update(dt,self.world)
-
-        iso_x, iso_y = self.player.get_iso_pos(self.renderer.tile_w, self.renderer.tile_h)
-        self.camera.center_on(iso_x, iso_y, self.width, self.height)
-
-
-        dx = 0
-        dy = 0
+        if self.game_state == 'play':
+            self.player.update(dt,self.world)
+            iso_x, iso_y = self.player.get_iso_pos(self.renderer.tile_w, self.renderer.tile_h)
+            self.camera.center_on(iso_x, iso_y, self.width, self.height)
         
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_RIGHT]:
-            dx += self.camera.camera_speed * dt 
-        if keys[pygame.K_LEFT]:
-            dx -= self.camera.camera_speed * dt 
-        if keys[pygame.K_UP]:
-            dy -= self.camera.camera_speed * dt 
-        if keys[pygame.K_DOWN]:
-            dy += self.camera.camera_speed * dt 
+            # sprawdź, czy jesteśmy przy bazie
+            self.is_near_base()
 
-        self.camera.move(dx,dy)
+        elif self.game_state == 'base_menu':
+            # logika do bazy po wcisnieciu E
+            print('Enterint base menu to make moves in base ->><<-')
+            pass
+
+    def is_near_base(self):
+        base_tx, base_ty = self.world.base_pos
+        px,py = self.player.tile_x, self.player.tile_y
+
+        dx = px - base_tx -  1
+        dy = py - base_ty - 2
+
+        self.near_base = (abs(dx) <= self.base_interaction_radius) and (abs(dy) <= self.base_interaction_radius)
+        print(f'self near base var -> {self.near_base} base_tx -> {base_tx} base_ty -> {base_ty} player_x -> {px} player_y -> {py}')
 
 
     # run the game just a funct
@@ -83,3 +104,6 @@ class Game():
             self.handle_events()
             self.update(dt)
             self.draw()
+
+
+    

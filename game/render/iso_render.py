@@ -7,7 +7,7 @@ class IsoRender():
 
         self.tile_w = 32
         self.tile_h = 16
-        self.base_pos = (10, 10) 
+        self.base_pos = (15, 15) 
 
         base_original = self.tile_set.base_img
         bw, bh = base_original.get_size()
@@ -16,6 +16,8 @@ class IsoRender():
         bh2 = int(bh * scale)
         self.base_img_small = pygame.transform.smoothscale(base_original, (bw2, bh2))
         self.base_rect_small = self.base_img_small.get_rect()
+
+        self.base_screen_pos = None
 
 
     def tile_to_screen(self, tx, ty):
@@ -120,7 +122,13 @@ class IsoRender():
         screen_w, screen_h = screen.get_size()
         cx, cy = screen_w // 2, screen_h // 2 
         zoom = self.camera.zoom
-        self.base_pos = (28, 25)
+
+
+        # ni wiem ale dziala trzeba bo obrazek za duzy skalowany potem zoomowany jakis cyrk moze wroce internet nie wie a ja taki madry to nie jestem :)
+        anchor_x = 50
+        anchor_y = 200
+
+
         tx ,ty = self.base_pos
         sx, sy = self.tile_to_screen(tx, ty) 
 
@@ -135,11 +143,15 @@ class IsoRender():
         # skalowanie odległości od środka 
         sx_zoom = cx + dx * zoom
         sy_zoom = cy + dy * zoom
-        tile_to_draw = pygame.transform.scale(base_img, (base_w, base_h))
-        offset_x = (base_w // 2) * zoom
-        offset_y = (base_h - self.tile_h) * zoom
+
+
+        offset_x = (anchor_x) * zoom
+        offset_y = (base_h - anchor_y) * zoom
 
         draw_x = sx_zoom - offset_x
         draw_y = sy_zoom - offset_y
         
-        screen.blit(tile_to_draw, (draw_x, draw_y))
+        self.base_screen_pos = (sx_zoom,sy_zoom - 10)
+
+        screen.blit(base_img, (draw_x, draw_y))
+        

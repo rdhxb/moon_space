@@ -33,7 +33,7 @@ class WorldMap():
         self.height_in_tiles = len(self.tile_data)
         self.width_in_tiles = len(self.tile_data[0])
         self.trees = []
-        self.base_pos = (28,25)
+        self.base_pos = (15,15)
 
 
     def get_tile(self, tx, ty):
@@ -51,17 +51,19 @@ class WorldMap():
                     self.free_tiles.append((tx,ty))
         
         base_tx, base_ty = self.base_pos
-        radius = 10
+        radius = 5
         # tiles without base 
         filtered_tiles = []
         for (tx,ty) in self.free_tiles:
             dx = tx - base_tx
             dy = ty - base_ty
             if abs(dx) <= radius and abs(dy) <= radius:
+                # print(f'Pass to close to base tx ->{tx} ty -> {ty}')
                 continue
             filtered_tiles.append((tx,ty))
         
         self.free_tiles = filtered_tiles
 
-        for _ in range(10):
+        for _ in range(5):
             self.trees.append(choice(self.free_tiles))
+            print(f'Trees on {choice(self.free_tiles)}')
