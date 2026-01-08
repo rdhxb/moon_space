@@ -5,9 +5,13 @@ class TileSet():
         self.tile_width = 32
         self.tile_floor_height = 16
         self.tile_wall_height = 32
-
+        
+        
         self.file_name_floor = 'game/data/assets/moon_floor.png'
         self.file_name_wall = 'game/data/assets/moon_wall.png'
+
+        self.base_img = pygame.image.load("game/data/assets/basee_one.png").convert_alpha()
+        
 
 
         self.image_floor = pygame.image.load(self.file_name_floor).convert_alpha()
@@ -18,7 +22,7 @@ class TileSet():
         self.rect_floor = self.image_floor.get_rect()
         self.rect_wall = self.image_wall.get_rect()
         self.tree_rect = self.tree_image.get_rect()
-
+        self.base_rect = self.base_img.get_rect()
 
         self.tiles = {
             0: self.image_floor.subsurface(64,0,self.tile_width,self.tile_floor_height),

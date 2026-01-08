@@ -12,8 +12,8 @@ class Ship():
         self.tile_x = int(self.tx)
         self.tile_y = int(self.ty)
 
-        self.width = 16
-        self.height = 16
+        self.width = 32
+        self.height = 32
 
         self.speed = 5
         self.color = (255,0,255)
@@ -123,7 +123,7 @@ class Ship():
         
         offset_y = sin(self.idle_phase) * self.idle_amplitude
         screen_w, screen_h = surface.get_size()
-        rotated = pygame.transform.rotate(self.ship_image, self.angle_deg)
+        rotated = pygame.transform.rotozoom(self.ship_image, self.angle_deg,1.5)
         rect = rotated.get_rect()
         rect.center = (screen_w // 2, screen_h // 2 + offset_y)
         surface.blit(rotated, rect.topleft)

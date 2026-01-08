@@ -22,7 +22,7 @@ class Game():
 
 
         self.world = WorldMap()
-
+        self.tree = self.world.create_tree()
         cx = self.world.width_in_tiles  / 2
         cy = self.world.height_in_tiles / 2
         self.player = Ship(cx, cy)
@@ -30,7 +30,7 @@ class Game():
         self.camera = Camera()
         self.renderer = IsoRender(self.world,self.camera, self.tile_set)
 
-        self.tree = self.world.create_tree()
+        
 
 
     # draw everything on the screen like player world ect. 
@@ -39,6 +39,8 @@ class Game():
         self.renderer.draw_world(self.screen)
         self.player.draw(self.screen)
         
+        self.renderer.draw_base(self.screen)
+        self.renderer.draw_trees(self.screen)
 
         pygame.display.flip()
         
