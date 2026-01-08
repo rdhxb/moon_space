@@ -1,6 +1,6 @@
 import pygame
 from ..world.world_map import WorldMap
-
+from math import sqrt, atan2, degrees, sin
 
 class Ship():
     # init the variables 
@@ -22,6 +22,22 @@ class Ship():
         self.ship_image = pygame.image.load('game/data/assets/ship.png').convert_alpha()
         self.ship_rect = self.ship_image.get_rect()
 
+        # vector ruchu 
+        self.vx = 0.0
+        self.vy = 0.0
+        # angle of drawing
+        self.angle_deg = 0.0
+        self.angle_target = 0.0
+        self.rotation_speed = 300.0
+
+        # idle gora dol w ruchu i w staniu
+        # faza animacji 
+        self.idle_phase = 0.0
+        # jak szybko sie buja 
+        self.idle_speed_while_still = 3.0
+        self.idel_speed_in_move = 5.0
+        # ile px gora dol
+        self.idle_amplitude = 4.0
 
 
     def update(self,dt,world):
@@ -45,32 +61,74 @@ class Ship():
             self.tile_y = int(self.ty)
 
 
+        # ship rotation using shortest path not faster then roptation speed 
+        diff = (self.angle_target - self.angle_deg + 180) % 360 - 180
+
+        max_step = self.rotation_speed * dt
+
+        if diff > max_step:
+            diff = max_step
+        elif diff < -max_step:
+            diff = -max_step
+
+        self.angle_deg += diff
 
 
 
-    def handle_input(self,dt):
+
+
+
+    def handle_input(self, dt):
+        move_x = 0.0
+        move_y = 0.0
+
         keys = pygame.key.get_pressed()
-        # top bottom movement based on speed
+
+        # kierunki WASD -> wektor ruchu
         if keys[pygame.K_w]:
-            self.ty -= self.speed * dt
+            move_y -= 1
         if keys[pygame.K_s]:
-            self.ty += self.speed * dt
-        # lef right movement based on speed  
+            move_y += 1
         if keys[pygame.K_a]:
-            self.tx -= self.speed * dt
+            move_x -= 1
         if keys[pygame.K_d]:
-            self.tx += self.speed * dt
+            move_x += 1
+
+        # brak ruchu
+        if move_x == 0 and move_y == 0:
+            self.vx = 0.0
+            self.vy = 0.0
+            self.idle_phase += self.idle_speed_while_still * dt
+            return
+
+        self.idle_phase += self.idel_speed_in_move * dt
+        length = sqrt(move_x**2 + move_y**2)
+        self.vx = move_x / length
+        self.vy = move_y / length
+
+        # ruch w świecie
+        self.tx += self.vx * self.speed * dt
+        self.ty += self.vy * self.speed * dt
+
+        # obrot statku
+        angle_rad = atan2(-self.vy, self.vx)  
+        self.angle_target = degrees(angle_rad) + 225
+
+
+
 
     # drawing ship on the screen based on x and y 
     def draw(self, surface : pygame.Surface):
+        offset_y = 0
+        
+        offset_y = sin(self.idle_phase) * self.idle_amplitude
         screen_w, screen_h = surface.get_size()
-        ship_w = self.ship_image.get_width()
-        ship_h = self.ship_image.get_height()
+        rotated = pygame.transform.rotate(self.ship_image, self.angle_deg)
+        rect = rotated.get_rect()
+        rect.center = (screen_w // 2, screen_h // 2 + offset_y)
+        surface.blit(rotated, rect.topleft)
 
-        draw_x = screen_w // 2 - ship_w // 2
-        draw_y = screen_h // 2 - ship_h // 2
-
-        surface.blit(self.ship_image,(draw_x,draw_y))
+        
         
 
 
