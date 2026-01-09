@@ -17,8 +17,11 @@ class TileSet():
         self.image_floor = pygame.image.load(self.file_name_floor).convert_alpha()
         self.image_wall = pygame.image.load(self.file_name_wall).convert_alpha()
         self.tree_image = pygame.image.load("game/data/assets/tree.png").convert_alpha()
+        self.iron_ore_img = pygame.image.load("game/data/assets/iron_ore.png").convert_alpha()
 
 
+
+        self.iron_ore_rect = self.iron_ore_img.get_rect()
         self.rect_floor = self.image_floor.get_rect()
         self.rect_wall = self.image_wall.get_rect()
         self.tree_rect = self.tree_image.get_rect()

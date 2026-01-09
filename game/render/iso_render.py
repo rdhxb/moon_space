@@ -74,48 +74,42 @@ class IsoRender():
                 screen.blit(tile_to_draw, (sx_zoom, sy_zoom))
 
             
-        # trees
-    def draw_trees(self,screen: pygame.Surface):
+    
+    def draw_sprites_helper(self, screen: pygame.Surface, img_attr: str, rect_attr: str, positions):
         screen_w, screen_h = screen.get_size()
-        cx, cy = screen_w // 2, screen_h // 2 
+        cx, cy = screen_w // 2, screen_h // 2
         zoom = self.camera.zoom
 
-        for (tx, ty) in self.world.trees:
-            sx, sy = self.tile_to_screen(tx, ty) 
+        img = getattr(self.tile_set, img_attr)            # pygame.Surface
+        rect = getattr(self.tile_set, rect_attr)          # pygame.Rect
+        img_w = rect.width
+        img_h = rect.height
 
-            tree_img = self.tile_set.tree_image
-            tree_w = self.tile_set.tree_rect.width
-            tree_h = self.tile_set.tree_rect.height
+        for (tx, ty) in positions:
+            sx, sy = self.tile_to_screen(tx, ty)
 
-            # przesunięcie względem środka ekranu
             dx = sx - cx
             dy = sy - cy
-
-            # skalowanie odległości od środka 
             sx_zoom = cx + dx * zoom
             sy_zoom = cy + dy * zoom
 
-            # skalowanie
             if zoom != 1.0:
-                tw = int(tree_w * zoom)
-                th = int(tree_h * zoom)
+                tw = int(img_w * zoom)
+                th = int(img_h * zoom)
                 if tw <= 0 or th <= 0:
                     continue
-
-                tile_to_draw = pygame.transform.scale(tree_img, (tw, th))
-
-                # offset drzewa po zoomie
-                offset_x = (tree_w // 2) * zoom
-                offset_y = (tree_h - self.tile_h) * zoom
+                tile_to_draw = pygame.transform.scale(img, (tw, th))
+                offset_x = (img_w / 2) * zoom
+                offset_y = (img_h - self.tile_h) * zoom
             else:
-                tile_to_draw = tree_img
-                offset_x = tree_w // 2
-                offset_y = (tree_h - self.tile_h)
+                tile_to_draw = img
+                offset_x = img_w / 2
+                offset_y = (img_h - self.tile_h)
 
             draw_x = sx_zoom - offset_x
             draw_y = sy_zoom - offset_y
-
             screen.blit(tile_to_draw, (draw_x, draw_y))
+
 
 
     def draw_base(self, screen: pygame.Surface):
@@ -163,6 +157,7 @@ class IsoRender():
         
 
 
+
     def draw_base_hint(self, screen, font, text):
         if not hasattr(self, "base_draw_rect") or self.base_draw_rect is None:
             return
@@ -189,3 +184,4 @@ class IsoRender():
 
         screen.blit(bg, (x - pad, y - pad))
         screen.blit(surf, (x, y))
+
