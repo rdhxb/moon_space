@@ -1,7 +1,7 @@
 import pygame
 from ..world.world_map import WorldMap
 from math import sqrt, atan2, degrees, sin
-
+from ..systems.inventory import Inventory
 class Ship():
     # init the variables 
     def __init__(self,x,y):
@@ -38,6 +38,9 @@ class Ship():
         self.idel_speed_in_move = 5.0
         # ile px gora dol
         self.idle_amplitude = 4.0
+
+        self.inventory = Inventory(4)
+
 
 
     def update(self,dt,world):

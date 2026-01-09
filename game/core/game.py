@@ -6,6 +6,8 @@ from ..render.iso_render import IsoRender
 from ..render.camera import Camera
 from ..ui.hud import HUD
 from ..data.items import validate_items
+from ..systems.inventory import ItemStack, Inventory
+
 pygame.init()
 
 class Game():
@@ -38,6 +40,10 @@ class Game():
 
         self.font = pygame.font.SysFont('None', 24)
         self.hud = HUD(self.renderer, self.font)
+
+
+        
+
 
         
 

@@ -121,15 +121,15 @@ class IsoRender():
     def draw_base(self, screen: pygame.Surface):
         screen_w, screen_h = screen.get_size()
         cx, cy = screen_w // 2, screen_h // 2
-        z = self.camera.zoom
+        zoom = self.camera.zoom
 
         tx, ty = self.world.base_pos
 
         sx, sy = self.tile_to_screen(tx, ty)
 
         # 3) zoom pozycji wokół środka ekranu 
-        sxz = cx + (sx - cx) * z
-        syz = cy + (sy - cy) * z
+        sxz = cx + (sx - cx) * zoom
+        syz = cy + (sy - cy) * zoom
 
         # 4) pivot sprite'a w pikselach
         base_img = self.base_img_small
@@ -139,12 +139,12 @@ class IsoRender():
         pivot_y = bh - self.tile_h   
 
         
-        if z != 1.0:
-            draw_w = int(bw * z)
-            draw_h = int(bh * z)
+        if zoom != 1.0:
+            draw_w = int(bw * zoom)
+            draw_h = int(bh * zoom)
             img = pygame.transform.smoothscale(base_img, (draw_w, draw_h))
-            pivot_xz = pivot_x * z
-            pivot_yz = pivot_y * z
+            pivot_xz = pivot_x * zoom
+            pivot_yz = pivot_y * zoom
         else:
             img = base_img
             pivot_xz = pivot_x
