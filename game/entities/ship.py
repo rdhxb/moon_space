@@ -38,7 +38,7 @@ class Ship():
         self.idel_speed_in_move = 5.0
         # ile px gora dol
         self.idle_amplitude = 4.0
-        self.inv_slots = 4
+        self.inv_slots = 2
 
         self.inventory = Inventory(self.inv_slots)
 

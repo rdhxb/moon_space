@@ -6,6 +6,7 @@ from ..render.iso_render import IsoRender
 from ..render.camera import Camera
 from ..ui.hud import HUD
 from ..data.items import validate_items
+from ..entities.base import Base
 
 from ..ui.inventory_ui import INVUI
 
@@ -44,10 +45,16 @@ class Game():
         self.hud = HUD(self.renderer,self.font)
 
 
-        self.invui = INVUI(self.tile_set,self.width,self.height,self.player.inv_slots)
+        self.invui = INVUI(self.tile_set,self.width,self.height)
 
         self.near_ore = False
         self.ore_tile = None
+
+        # pozycja bazy z world 
+        bx,by = self.world.base_pos
+        self.base = Base(bx, by, 30)
+
+        self.is_base_storge_open = False
 
 
 
@@ -67,9 +74,13 @@ class Game():
             self.renderer.draw_ore_hint(self.screen, self.font, self.ore_tile, self.camera)
 
 
-        if self.invui.is_visible:
-            self.invui.draw(self.screen,self.player.inventory)
+        if self.invui.is_visible and self.base.is_visible == False:
+            self.invui.draw(self.screen,self.player.inventory,self.width//2 - (32.5 * self.player.inv_slots),(self.height // 2) - 200 , 6)
 
+        
+        if self.base.is_visible:
+            self.invui.draw(self.screen,self.player.inventory,150,250 , 5)
+            self.invui.draw(self.screen,self.base.storage,1410 ,250, 5)
 
 
         pygame.display.flip()
@@ -88,15 +99,13 @@ class Game():
                         print('Enter base menu')
 
                     if event.key == pygame.K_e and self.near_ore and self.ore_tile != None:
-                        leftover = self.player.inventory.add('iron_ore', 55)
-                        
+                        qty_to_pick = 3
+                        leftover = self.player.inventory.add('iron_ore', qty_to_pick)
+                        moved = qty_to_pick - leftover
 
-                        if leftover == 0:
-                            # znika po zebraniu
+                        if moved > 0.1 * leftover:
+                            print(0.1 * leftover)
                             self.world.iron_ores.remove(self.ore_tile)
-                            print('Zebrano rudę: +5 iron_ore')
-                            # self.player.inventory.debug_print(self.player)
-
                         else:
                             print('Brak miejsca w inventory')
                             # self.player.inventory.debug_print(self.player)
@@ -106,6 +115,17 @@ class Game():
                     if event.key == pygame.K_e and self.near_base:
                         self.game_state = 'play'
                         print('Exit base menu enter play ')
+                        self.base.is_visible = False
+                    if event.key == pygame.K_d:
+                        moved = self.base.deposit_all(self.player.inventory)
+                        print(f'moved -> {moved}')
+                    if event.key == pygame.K_p and self.base.is_visible == False:
+                        self.base.is_visible = True
+                    
+                        
+
+
+                    
 
 
 

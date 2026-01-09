@@ -6,6 +6,8 @@ class Inventory:
         self.slots = [None] * self.capacity
 
     def add(self, item_id, qty):
+        if qty <= 0:
+            return 0
         leftover = qty
 
         # dodaj do istniejacych stackow

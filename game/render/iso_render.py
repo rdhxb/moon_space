@@ -183,6 +183,8 @@ class IsoRender():
     def draw_ore_hint(self,screen: pygame.Surface, font, ore_tile, camera):
         # jesli jest nad ruda czyli game.near_ore = True to blituje napis maly E nad ruda to bedzie do wylaczenie w ustawieniach jak kazdy hint
         # find ore x and y 
+
+        # nizej tylko przeliczanie tx o ty ore bo to mamy na px ekranu zeby dalo sie blitowac pewnie funkcja by sie przydala bo wszsytko ma hinty ale to potem 
         sw, sh = screen.get_size()
         ore_tx , ore_ty = ore_tile
         
