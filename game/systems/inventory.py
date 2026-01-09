@@ -87,6 +87,13 @@ class Inventory:
                 continue
             print(f'Aktualny stan plecaka - > slot: {i}, item_id: {stack.item_id}, ilosc: {stack.qty}')
 
+    
+    def resize(self, new_capacity):
+        if new_capacity <= self.capacity:
+            return
+        self.slots.extend([None] * (new_capacity - self.capacity))
+        self.capacity = new_capacity
+
 
 
 

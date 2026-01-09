@@ -38,7 +38,11 @@ class Ship():
         self.idel_speed_in_move = 5.0
         # ile px gora dol
         self.idle_amplitude = 4.0
-        self.inv_slots = 2
+        # backpack level (inv slots)
+        self.backpack_lvl = 0
+        self.inv_slots = (1 * self.backpack_lvl) + 1
+        # mining level
+        self.mining_lvl = 1
 
         self.inventory = Inventory(self.inv_slots)
 
@@ -134,7 +138,6 @@ class Ship():
         surface.blit(rotated, rect.topleft)
 
         
-        
 
 
     def get_iso_pos(self,tile_w,tile_h):
@@ -145,6 +148,6 @@ class Ship():
 
 
 
-
-
-
+    def recalc_inventory_capacity(self):
+        self.inv_slots = (1 * self.backpack_lvl) + 1
+        self.inventory.resize(self.inv_slots)

@@ -2,7 +2,7 @@ import pygame
 class Camera():
     def __init__(self):
         self.camera_speed = 1
-        self.zoom = 2.5
+        self.zoom = 2
 
     
     def move(self, dx, dy):

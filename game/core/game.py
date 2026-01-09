@@ -7,6 +7,7 @@ from ..render.camera import Camera
 from ..ui.hud import HUD
 from ..data.items import validate_items
 from ..entities.base import Base
+from ..systems.upgrade import UpgradeSystem
 
 from ..ui.inventory_ui import INVUI
 
@@ -25,6 +26,8 @@ class Game():
         self.running = True
         self.color = (0,0,0)
         validate_items()
+
+        
 
 
         self.world = WorldMap()
@@ -56,6 +59,7 @@ class Game():
 
         self.is_base_storge_open = False
 
+        self.upgrade = UpgradeSystem(self.player,self.base.storage)
 
 
     # draw everything on the screen like player world ect. 
@@ -99,12 +103,11 @@ class Game():
                         print('Enter base menu')
 
                     if event.key == pygame.K_e and self.near_ore and self.ore_tile != None:
-                        qty_to_pick = 3
+                        qty_to_pick = 1 * self.player.mining_lvl
                         leftover = self.player.inventory.add('iron_ore', qty_to_pick)
                         moved = qty_to_pick - leftover
 
-                        if moved > 0.1 * leftover:
-                            print(0.1 * leftover)
+                        if moved > 0:
                             self.world.iron_ores.remove(self.ore_tile)
                         else:
                             print('Brak miejsca w inventory')
@@ -121,6 +124,11 @@ class Game():
                         print(f'moved -> {moved}')
                     if event.key == pygame.K_p and self.base.is_visible == False:
                         self.base.is_visible = True
+
+                    # upgrafeing test
+                    if event.key == pygame.K_u:
+                        print(self.base.storage.count("iron_ore"))
+                        self.upgrade.try_upgrade('backpack')
                     
                         
 
@@ -149,10 +157,10 @@ class Game():
             self.is_near_base()
             self.is_near_ore()
 
-        elif self.game_state == 'base_menu':
-            # logika do bazy po wcisnieciu E
-            # print('Enterint base menu to make moves in base ->><<-')
-            pass
+        # elif self.game_state == 'base_menu':
+        #     # logika do bazy po wcisnieciu E
+        #     # print('Enterint base menu to make moves in base ->><<-')
+        #     pass
 
     def is_near_base(self):
         base_tx, base_ty = self.world.base_pos
