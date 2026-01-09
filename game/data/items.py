@@ -1,4 +1,4 @@
-
+import pygame
 ITEMS = {
     "iron_ore": {
         "name": "Ruda żelaza",
@@ -13,8 +13,10 @@ ITEMS = {
         "stack_max": 50,
         "value": 3,
         "description": "Przydatna do elektroniki i przewodników.",
+        "icon": "game/data/assets/copper_ore.png",
     },
 }
+
 
 def get_item(item_id: str) -> dict:
     return ITEMS[item_id]

@@ -36,7 +36,7 @@ class WorldMap():
         self.base_pos = (15,15)
         self.trees_amount = 4
         self.iron_ores = []
-        self.ores_amount = 3
+        self.ores_amount = 6
 
 
 
@@ -80,5 +80,6 @@ class WorldMap():
             pos = choice(self.free_tiles)
             self.iron_ores.append(pos)
             self.free_tiles.remove(pos)
+        
                  
             

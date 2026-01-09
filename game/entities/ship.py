@@ -38,8 +38,9 @@ class Ship():
         self.idel_speed_in_move = 5.0
         # ile px gora dol
         self.idle_amplitude = 4.0
+        self.inv_slots = 4
 
-        self.inventory = Inventory(4)
+        self.inventory = Inventory(self.inv_slots)
 
 
 
@@ -62,6 +63,7 @@ class Ship():
             self.tx, self.ty = old_tx, old_ty
             self.tile_x = int(self.tx)
             self.tile_y = int(self.ty)
+
 
 
         # ship rotation using shortest path not faster then roptation speed 

@@ -1,7 +1,7 @@
 from ..data.items import stack_max
 
 class Inventory:
-    def __init__(self, capacity=20):
+    def __init__(self, capacity=4):
         self.capacity = capacity
         self.slots = [None] * self.capacity
 
@@ -69,6 +69,23 @@ class Inventory:
 
     def has(self, item_id, qty):
         return self.count(item_id) >= qty
+    
+    def iter_stacks(self):
+        for i in self.slots:
+            if i is not None and i.qty > 0:
+                yield i
+
+    def used_slots(self):
+        return sum(1 for s in self.slots if s is not None and s.qty > 0)
+    
+
+    def debug_print(self,player):
+        for i, stack in enumerate(player.inventory.slots):
+            if stack is None:
+                continue
+            print(f'Aktualny stan plecaka - > slot: {i}, item_id: {stack.item_id}, ilosc: {stack.qty}')
+
+
 
 
 
