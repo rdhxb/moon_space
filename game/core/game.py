@@ -10,6 +10,7 @@ from ..entities.base import Base
 from ..systems.upgrade import UpgradeSystem
 
 from ..ui.inventory_ui import INVUI
+from ..ui.base_ui import BaseUI
 
 pygame.init()
 
@@ -20,7 +21,7 @@ class Game():
         self.height = 1080
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-        self.FPS = 60
+        self.FPS = 120
         self.clock = pygame.time.Clock()
 
         self.running = True
@@ -61,6 +62,8 @@ class Game():
 
         self.upgrade = UpgradeSystem(self.player,self.base.storage)
 
+        self.base_ui = BaseUI(self.width, self.height)
+
 
     # draw everything on the screen like player world ect. 
     def draw(self):
@@ -81,16 +84,13 @@ class Game():
         if self.invui.is_visible and self.base.is_visible == False:
             self.invui.draw(self.screen,self.player.inventory,self.width//2 - (32.5 * self.player.inv_slots),(self.height // 2) - 200 , 6)
 
-        
-        if self.base.is_visible:
-            self.invui.draw(self.screen,self.player.inventory,150,250 , 5)
-            self.invui.draw(self.screen,self.base.storage,1410 ,250, 5)
+
+        self.base_ui.draw(self.invui,self.base,self.player,self.screen)
 
 
         pygame.display.flip()
         
 
-    # handle basic events like quit i dont know will it be more
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -100,7 +100,7 @@ class Game():
                 if self.game_state == 'play':
                     if event.key == pygame.K_e and self.near_base:
                         self.game_state = 'base_menu'
-                        print('Enter base menu')
+                        self.base_ui.open()
 
                     if event.key == pygame.K_e and self.near_ore and self.ore_tile != None:
                         qty_to_pick = 1 * self.player.mining_lvl
@@ -115,15 +115,9 @@ class Game():
 
                 
                 elif self.game_state == 'base_menu':
-                    if event.key == pygame.K_e and self.near_base:
-                        self.game_state = 'play'
-                        print('Exit base menu enter play ')
-                        self.base.is_visible = False
-                    if event.key == pygame.K_d:
-                        moved = self.base.deposit_all(self.player.inventory)
-                        print(f'moved -> {moved}')
-                    if event.key == pygame.K_p and self.base.is_visible == False:
-                        self.base.is_visible = True
+                    self.base_ui.handle_event(event,self.base, self.player)
+                    if self.game_state == "base_menu" and not self.base_ui.is_visible:
+                        self.game_state = "play"
 
                     # upgrafeing test
                     if event.key == pygame.K_u:

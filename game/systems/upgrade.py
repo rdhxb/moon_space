@@ -37,7 +37,6 @@ class UpgradeSystem():
         for item_id, need in cost.items():
             self.storage.remove(item_id, need)
 
-        print('NIGG')
         self.apply_upgrade(upg_name)
         return True
 
