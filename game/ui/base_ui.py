@@ -6,6 +6,7 @@ class BaseUI():
         self.base_home_img = pygame.image.load('game/data/assets/base/base_home.png').convert_alpha()
         self.base_home_rect = self.base_home_img.get_rect()
         self.base_storage_img = pygame.image.load('game/data/assets/base/base_storage.png').convert_alpha()
+        self.base_upgrade_img = pygame.image.load('game/data/assets/base/base_upgrade.png').convert_alpha()
 
 
         self.panel_w = 900
@@ -21,6 +22,14 @@ class BaseUI():
         self.dim = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
         self.dim.fill((0,0,0,140))
 
+        self.font = pygame.font.SysFont("Comic Sans MS", 22, bold=True)
+        self.col_ok = (40, 200, 80)     # zielony
+        self.col_no = (220, 60, 60)     # czerwony
+        self.col_done = (30, 30, 30)    # czarny / ciemny
+        self.col_white = (240, 240, 240)
+
+        
+
 
 
     def open(self):
@@ -31,14 +40,13 @@ class BaseUI():
         self.is_visible = False
     
 
-    def handle_event(self, event, base, player):
+    def handle_event(self, event, base, player, upg):
         if not self.is_visible:
             return
 
         if event.type == pygame.KEYDOWN:
             if event.key in (pygame.K_ESCAPE, pygame.K_e):
                 if self.base_state == "home":
-                    
                     self.close()  
                 else:
                     self.base_state = "home"
@@ -52,8 +60,11 @@ class BaseUI():
             if event.key == pygame.K_d and self.base_state == 'storage':
                 base.deposit_all(player.inventory)
 
+            if event.key == pygame.K_b and self.base_state == 'upgrade':
+                upg.try_upgrade('backpack')
+
         
-    def draw(self,invui,base,player, screen : pygame.Surface):
+    def draw(self,invui,base,player, screen : pygame.Surface, upgrade_sys):
         if not self.is_visible:
             return
         screen.blit(self.dim, (0, 0))
@@ -64,3 +75,47 @@ class BaseUI():
             screen.blit(self.base_storage_img,(self.x,self.y))
             invui.draw(screen,player.inventory,550,340 , 5)
             invui.draw(screen,base.storage,1000 ,340, 5)
+        if self.base_state == 'upgrade':
+            screen.blit(self.base_upgrade_img, (self.x, self.y))
+
+            tx = self.x + 80
+            ty = self.y + 140
+            line_h = 34
+
+ 
+            backpack_costs = upgrade_sys.COSTS.get("backpack", {})
+            for lvl in sorted(backpack_costs.keys()):
+                cost = backpack_costs[lvl]  
+
+                status = self._upgrade_status("backpack", lvl, cost, player, base.storage)
+                if status == "done":
+                    color = self.col_done
+                elif status == "available":
+                    color = self.col_ok
+                else:
+                    color = self.col_no
+
+                
+                cost_txt = ", ".join([f"{need} {item_id}" for item_id, need in cost.items()])
+                text = f"Backpack lvl {lvl} - {cost_txt} TO BUY PRESS --> {'B'}"
+
+                self._draw_upgrade_line(screen, text, color, tx, ty)
+                ty += line_h
+
+
+    # upgrad hlper
+    def _upgrade_status(self, upgrade_name, target_lvl, cost, player, storage):
+    
+        current = player.backpack_lvl if upgrade_name == "backpack" else player.mining_lvl
+        if current >= target_lvl:
+            return "done"
+
+        for item_id, need in cost.items():
+            if storage.count(item_id) < need:
+                return "locked"
+        return "available"
+    
+    def _draw_upgrade_line(self, screen, text, color, x, y):
+        surf = self.font.render(text, True, color)
+        screen.blit(surf, (x, y))
+

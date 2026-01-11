@@ -85,7 +85,7 @@ class Game():
             self.invui.draw(self.screen,self.player.inventory,self.width//2 - (32.5 * self.player.inv_slots),(self.height // 2) - 200 , 6)
 
 
-        self.base_ui.draw(self.invui,self.base,self.player,self.screen)
+        self.base_ui.draw(self.invui,self.base,self.player,self.screen,self.upgrade)
 
 
         pygame.display.flip()
@@ -115,19 +115,9 @@ class Game():
 
                 
                 elif self.game_state == 'base_menu':
-                    self.base_ui.handle_event(event,self.base, self.player)
+                    self.base_ui.handle_event(event,self.base, self.player,self.upgrade)
                     if self.game_state == "base_menu" and not self.base_ui.is_visible:
                         self.game_state = "play"
-
-                    # upgrafeing test
-                    if event.key == pygame.K_u:
-                        print(self.base.storage.count("iron_ore"))
-                        self.upgrade.try_upgrade('backpack')
-                    
-                        
-
-
-                    
 
 
 
