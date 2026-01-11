@@ -63,6 +63,9 @@ class BaseUI():
             if event.key == pygame.K_b and self.base_state == 'upgrade':
                 upg.try_upgrade('backpack')
 
+            if event.key == pygame.K_m and self.base_state == 'upgrade':
+                upg.try_upgrade('mining')
+
         
     def draw(self,invui,base,player, screen : pygame.Surface, upgrade_sys):
         if not self.is_visible:
@@ -79,7 +82,9 @@ class BaseUI():
             screen.blit(self.base_upgrade_img, (self.x, self.y))
 
             tx = self.x + 80
-            ty = self.y + 140
+            backpact_ty = self.y + 140
+            mining_ty = self.y + 140
+
             line_h = 34
 
  
@@ -97,10 +102,30 @@ class BaseUI():
 
                 
                 cost_txt = ", ".join([f"{need} {item_id}" for item_id, need in cost.items()])
-                text = f"Backpack lvl {lvl} - {cost_txt} TO BUY PRESS --> {'B'}"
+                text = f"Backpack lvl {lvl} - {cost_txt} [B]"
 
-                self._draw_upgrade_line(screen, text, color, tx, ty)
-                ty += line_h
+                self._draw_upgrade_line(screen, text, color, tx, backpact_ty)
+                backpact_ty += line_h
+
+
+            mining_costs = upgrade_sys.COSTS.get("mining", {})
+            for lvl in sorted(mining_costs.keys()):
+                cost = mining_costs[lvl]  
+
+                status = self._upgrade_status("mining", lvl, cost, player, base.storage)
+                if status == "done":
+                    color = self.col_done
+                elif status == "available":
+                    color = self.col_ok
+                else:
+                    color = self.col_no
+
+                
+                cost_txt = ", ".join([f"{need} {item_id}" for item_id, need in cost.items()])
+                text = f"Mining lvl {lvl} - {cost_txt} [M]"
+
+                self._draw_upgrade_line(screen, text, color, tx + 400 , mining_ty)
+                mining_ty += line_h
 
 
     # upgrad hlper
@@ -118,4 +143,3 @@ class BaseUI():
     def _draw_upgrade_line(self, screen, text, color, x, y):
         surf = self.font.render(text, True, color)
         screen.blit(surf, (x, y))
-

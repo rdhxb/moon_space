@@ -42,7 +42,7 @@ class Ship():
         self.backpack_lvl = 0
         self.inv_slots = (1 * self.backpack_lvl) + 1
         # mining level
-        self.mining_lvl = 1
+        self.mining_lvl = 0
 
         self.inventory = Inventory(self.inv_slots)
 

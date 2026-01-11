@@ -3,7 +3,7 @@ class UpgradeSystem():
         self.player = player
         self.storage = storage
 
-        self.COSTS = {"backpack": {1: {"iron_ore": 1}, 2: {"iron_ore": 20}}, "mining": {...}}
+        self.COSTS = {"backpack": {1: {"iron_ore": 1}, 2: {"iron_ore": 20}}, "mining": {1: {"iron_ore": 1}, 2: {"iron_ore": 20}}}
 
 
     def get_cost(self, upg_name):
@@ -44,3 +44,6 @@ class UpgradeSystem():
         if upgrade_name == "backpack":
             self.player.backpack_lvl += 1
             self.player.recalc_inventory_capacity()
+        
+        if upgrade_name == 'mining':
+            self.player.mining_lvl += 1

@@ -103,7 +103,7 @@ class Game():
                         self.base_ui.open()
 
                     if event.key == pygame.K_e and self.near_ore and self.ore_tile != None:
-                        qty_to_pick = 1 * self.player.mining_lvl
+                        qty_to_pick = (1 * self.player.mining_lvl) + 1
                         leftover = self.player.inventory.add('iron_ore', qty_to_pick)
                         moved = qty_to_pick - leftover
 
@@ -112,6 +112,11 @@ class Game():
                         else:
                             print('Brak miejsca w inventory')
                             # self.player.inventory.debug_print(self.player)
+                    
+                    if event.key == pygame.K_i and self.invui.is_visible != True:
+                        self.invui.is_visible = True
+                    elif event.key == pygame.K_i and self.invui.is_visible == True:
+                        self.invui.is_visible = False
 
                 
                 elif self.game_state == 'base_menu':
@@ -121,10 +126,7 @@ class Game():
 
 
 
-                if event.key == pygame.K_i and self.invui.is_visible != True:
-                    self.invui.is_visible = True
-                elif event.key == pygame.K_i and self.invui.is_visible == True:
-                    self.invui.is_visible = False
+                
 
 
                 
@@ -141,10 +143,6 @@ class Game():
             self.is_near_base()
             self.is_near_ore()
 
-        # elif self.game_state == 'base_menu':
-        #     # logika do bazy po wcisnieciu E
-        #     # print('Enterint base menu to make moves in base ->><<-')
-        #     pass
 
     def is_near_base(self):
         base_tx, base_ty = self.world.base_pos
