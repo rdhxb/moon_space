@@ -7,6 +7,9 @@ class MissionTracker:
         self.completed = set()
         self.player = player
         
+        self.compleated_count = 0
+        self.current_planet = "moon"
+        
 
     def _mark_done_if_needed(self, mission_id):
         target = self.missions[mission_id]["target"]
@@ -15,6 +18,9 @@ class MissionTracker:
             self.completed.add(mission_id)
             self.missions[mission_id]['is_compleated'] = True
             self.player.lvl += 0.5
+
+            self.compleated_count += 1 
+
             
             
 
@@ -78,8 +84,13 @@ class MissionTracker:
         return (m["title"], prog, target, done)
 
     def iter_rows(self):
-        for mission_id in self.missions:
+        for mission_id, m in self.missions.items():
+            if m.get("planet") != self.current_planet:
+                continue
             yield mission_id, self.get_row(mission_id)
+
+    def set_planet(self, planet_id: str):
+        self.current_planet = planet_id
 
     def debug_msg(self):
         print(self.progress)

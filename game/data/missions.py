@@ -7,7 +7,9 @@ MISSIONS = {
         "type": "collect_item",
         "target": 5,
         "params": {"item_id": "iron_ore"},
-        'is_compleated': False
+        'is_compleated': False,
+        'planet': 'moon'
+
     },
 
     # 2) Zbierz iron ore (30)
@@ -17,7 +19,8 @@ MISSIONS = {
         "type": "collect_item",
         "target": 30,
         "params": {"item_id": "iron_ore"},
-        'is_compleated': False
+        'is_compleated': False,
+        'planet': 'moon'
 
     },
 
@@ -28,7 +31,8 @@ MISSIONS = {
         "type": "open_ui",
         "target": 1,
         "params": {"ui": "storage"},
-        'is_compleated': False
+        'is_compleated': False,
+        'planet': 'moon'
     },
 
     # 4) Zdeponuj iron ore do magazynu (20)
@@ -38,7 +42,8 @@ MISSIONS = {
         "type": "deposit_item",
         "target": 20,
         "params": {"item_id": "iron_ore"},
-        'is_compleated': False
+        'is_compleated': False,
+        'planet': 'moon'
     },
 
     # 5) Przeleć dystans (200 jednostek)
@@ -48,7 +53,18 @@ MISSIONS = {
         "type": "travel",
         "target": 200,
         "params": {"unit": "u"},
-        'is_compleated': False
+        'is_compleated': False,
+        'planet': 'moon'
+    },
+    "m_collect_iron_1": {
+        "title": "Pierwsza ruda",
+        "desc": "Zbierz rudę żelaza.",
+        "type": "collect_item",
+        "target": 1,
+        "params": {"item_id": "iron_ore"},
+        'is_compleated': False,
+        'planet': 'mars'
+
     },
 }
 
