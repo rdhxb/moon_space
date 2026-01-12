@@ -1,10 +1,12 @@
 from ..data.missions import MISSIONS
 
 class MissionTracker:
-    def __init__(self):
+    def __init__(self, player):
         self.missions = MISSIONS
         self.progress = {mission_id: 0 for mission_id in self.missions}
         self.completed = set()
+        self.player = player
+        
 
     def _mark_done_if_needed(self, mission_id):
         target = self.missions[mission_id]["target"]
@@ -12,6 +14,10 @@ class MissionTracker:
             self.progress[mission_id] = target
             self.completed.add(mission_id)
             self.missions[mission_id]['is_compleated'] = True
+            self.player.lvl += 0.1
+            print(self.player.lvl)
+            
+            
 
     def on_item_collected(self, item_id, qty):
         if qty <= 0:

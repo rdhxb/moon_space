@@ -137,8 +137,12 @@ class BaseUI():
     def _upgrade_status(self, upgrade_name, target_lvl, cost, player, storage):
     
         current = player.backpack_lvl if upgrade_name == "backpack" else player.mining_lvl
+
         if current >= target_lvl:
             return "done"
+        
+        if player.lvl < target_lvl:
+            return 'locked'
 
         for item_id, need in cost.items():
             if storage.count(item_id) < need:

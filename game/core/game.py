@@ -63,7 +63,7 @@ class Game():
 
         self.base_ui = BaseUI(self.width, self.height)
 
-        self.mission = MissionTracker()
+        self.mission = MissionTracker(self.player)
 
         self.prev_tx = self.player.tx
         self.prev_ty = self.player.ty
