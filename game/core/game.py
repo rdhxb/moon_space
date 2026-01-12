@@ -28,7 +28,7 @@ class Game():
         self.height = 1080
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-        self.FPS = 120
+        self.FPS = 60
         self.clock = pygame.time.Clock()
 
         self.running = True
@@ -158,12 +158,14 @@ class Game():
     def update(self, dt):
         if self.game_state == 'play':
             self.player.update(dt,self.world)
+            self.world.center_tx = int(self.player.tx)
+            self.world.center_ty = int(self.player.ty)
             iso_x, iso_y = self.player.get_iso_pos(self.renderer.tile_w, self.renderer.tile_h)
             self.camera.center_on(iso_x, iso_y, self.width, self.height)
         
             # sprawdź, czy jesteśmy przy bazie
             self.is_near_base()
-            
+
             self.is_near_ore()
 
             self.distance_count()

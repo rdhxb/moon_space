@@ -49,6 +49,10 @@ class Ship():
         self.lvl = 1
 
         self.gold: int = 0
+        self._rot_cache = {}          
+        self._last_angle_step = None
+        self._angle_step_deg = 3    
+        self._scale = 1.5
 
 
 
@@ -131,12 +135,20 @@ class Ship():
 
 
     # drawing ship on the screen based on x and y 
-    def draw(self, surface : pygame.Surface):
-        offset_y = 0
-        
+    def draw(self, surface: pygame.Surface):
         offset_y = sin(self.idle_phase) * self.idle_amplitude
+
         screen_w, screen_h = surface.get_size()
-        rotated = pygame.transform.rotozoom(self.ship_image, self.angle_deg,1.5)
+
+        # kwantyzacja kąta (np. co 5°)
+        angle_step = int(round(self.angle_deg / self._angle_step_deg)) * self._angle_step_deg
+        angle_step %= 360
+
+        rotated = self._rot_cache.get(angle_step)
+        if rotated is None:
+            rotated = pygame.transform.rotozoom(self.ship_image, angle_step, self._scale)
+            self._rot_cache[angle_step] = rotated
+
         rect = rotated.get_rect()
         rect.center = (screen_w // 2, screen_h // 2 + offset_y)
         surface.blit(rotated, rect.topleft)

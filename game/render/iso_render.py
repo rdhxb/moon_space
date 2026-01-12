@@ -19,6 +19,9 @@ class IsoRender():
 
         self.base_screen_pos = None
 
+        self._tile_cache = {}          
+        self._cache_zoom_key = None   
+
 
     def tile_to_screen(self, tx, ty):
         half_w = self.tile_w //2
@@ -39,39 +42,38 @@ class IsoRender():
         h = self.world.height_in_tiles
         w = self.world.width_in_tiles
 
-        screen_w, screen_h = screen.get_size()
-        cx, cy = screen_w // 2, screen_h // 2 
+        sw, sh = screen.get_size()
+        cx, cy = sw // 2, sh // 2
         zoom = self.camera.zoom
 
-        for ty in range(h):
-            for tx in range(w):
-                # 0 = floor, 1 = wall itd.
+        tiles_x = int((sw / (self.tile_w * zoom)) * 2) + 8
+        tiles_y = int((sh / (self.tile_h * zoom)) * 2) + 8
+
+
+        center_tx = getattr(self.world, "center_tx", w // 2)
+        center_ty = getattr(self.world, "center_ty", h // 2)
+
+        min_tx = max(0, center_tx - tiles_x)
+        max_tx = min(w - 1, center_tx + tiles_x)
+        min_ty = max(0, center_ty - tiles_y)
+        max_ty = min(h - 1, center_ty + tiles_y)
+
+        for ty in range(min_ty, max_ty + 1):
+            for tx in range(min_tx, max_tx + 1):
                 tile_id = self.world.get_tile(tx, ty)
-                surface_tile = self.tile_set.get_surface(tile_id)
-                if surface_tile is None:
-                    continue  # brak kafla dla tego ID
+                tile_to_draw = self._get_tile_surface_cached(tile_id, zoom)
+                if tile_to_draw is None:
+                    continue
 
                 sx, sy = self.tile_to_screen(tx, ty)
 
-                # przesuniecie wzgledem srodka ekranu 
                 dx = sx - cx
                 dy = sy - cy
+                sxz = cx + dx * zoom
+                syz = cy + dy * zoom
 
-                # skalowanie odleglosci od srodka
-                sx_zoom = cx + dx * zoom
-                sy_zoom = cy  + dy * zoom
+                screen.blit(tile_to_draw, (sxz, syz))
 
-                # 4. skalowanie sprite'a kafla
-                if zoom != 1.0:
-                    tw = int(surface_tile.get_width() * zoom)
-                    th = int(surface_tile.get_height() * zoom)
-                    if tw <= 0 or th <= 0:
-                        continue  # przy ekstremalnie małym zoomie
-                    tile_to_draw = pygame.transform.scale(surface_tile, (tw, th))
-                else:
-                    tile_to_draw = surface_tile
-
-                screen.blit(tile_to_draw, (sx_zoom, sy_zoom))
 
             
     def draw_sprites_helper(self, screen: pygame.Surface, img_attr: str, rect_attr: str, positions):
@@ -79,8 +81,8 @@ class IsoRender():
         cx, cy = screen_w // 2, screen_h // 2
         zoom = self.camera.zoom
 
-        img = getattr(self.tile_set, img_attr)            # pygame.Surface
-        rect = getattr(self.tile_set, rect_attr)          # pygame.Rect
+        img = getattr(self.tile_set, img_attr)      
+        rect = getattr(self.tile_set, rect_attr)          
         img_w = rect.width
         img_h = rect.height
 
@@ -201,6 +203,37 @@ class IsoRender():
         over_ore = 30
 
         screen.blit(font.render('E',False, "#BF0930CA"), (sxz ,syz - over_ore))
+
+
+    
+    def _get_tile_surface_cached(self, tile_id: int, zoom: float):
+        zoom_key = round(zoom, 2)
+
+        if self._cache_zoom_key != zoom_key:
+            self._tile_cache.clear()
+            self._cache_zoom_key = zoom_key
+
+        key = (tile_id, zoom_key)
+        surf = self._tile_cache.get(key)
+        if surf is not None:
+            return surf
+
+        base = self.tile_set.get_surface(tile_id)
+        if base is None:
+            return None
+
+        if zoom_key == 1.0:
+            surf = base
+        else:
+            tw = int(base.get_width() * zoom_key)
+            th = int(base.get_height() * zoom_key)
+            if tw <= 0 or th <= 0:
+                return None
+            surf = pygame.transform.smoothscale(base, (tw, th))
+
+        self._tile_cache[key] = surf
+        return surf
+
 
 
 
