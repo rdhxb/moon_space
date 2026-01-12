@@ -16,15 +16,17 @@ class INVUI():
 
 
     
-    def draw(self,screen: pygame.Surface, inventory, x, y, cols):
+    def draw(self,screen: pygame.Surface, inventory, x, y, cols, return_rect = False):
         inv_slots = len(inventory.slots)
 
-        # shift for every new block 
-        left_shift = 32.5
+
         slot_w = self.inv_img.get_width()
         slot_h = self.inv_img.get_height()
         gap = 10
         rows = (inv_slots + cols - 1) // cols
+
+        rects = [] if return_rect  else None
+
         for i in range(min(len(inventory.slots), cols * rows)):
             col = i % cols
             row = i // cols
@@ -32,6 +34,9 @@ class INVUI():
             slot_y = y + row * (slot_h + gap)
 
             screen.blit(self.inv_img,(slot_x,slot_y))
+
+            if return_rect:
+                rects.append(pygame.Rect(slot_x, slot_y, slot_w, slot_h))
 
 
 
@@ -60,4 +65,5 @@ class INVUI():
             screen.blit(icon, (ix, iy))
             screen.blit(self.font.render(f'{item_qty}x', False, (191, 9, 48)), (slot_x + 6, slot_y + slot_h - 24))
 
+        return rects
 

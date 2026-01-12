@@ -14,6 +14,10 @@ from ..ui.base_ui import BaseUI
 
 from ..systems.missions import MissionTracker
 
+from ..ui.player_ui import PlayerUI
+
+from ..systems.shop import Shop
+
 pygame.init()
 
 class Game():
@@ -68,6 +72,9 @@ class Game():
         self.prev_tx = self.player.tx
         self.prev_ty = self.player.ty
 
+        self.player_ui = PlayerUI()
+        self.shop = Shop()
+
 
     # draw everything on the screen like player world ect. 
     def draw(self):
@@ -89,7 +96,9 @@ class Game():
             self.invui.draw(self.screen,self.player.inventory,self.width//2 - (32.5 * self.player.inv_slots),(self.height // 2) - 200 , 6)
 
 
-        self.base_ui.draw(self.invui,self.base,self.player,self.screen,self.upgrade)
+        self.base_ui.draw(self.invui,self.base,self.player,self.screen,self.upgrade,self.mission)
+
+        self.player_ui.draw_player_current_stats(self.screen,self.font,self.player)
 
 
         pygame.display.flip()
@@ -126,7 +135,7 @@ class Game():
 
                 
                 elif self.game_state == 'base_menu':
-                    self.base_ui.handle_event(event,self.base, self.player,self.upgrade, self.mission)
+                    self.base_ui.handle_event(event,self.base, self.player,self.upgrade, self.mission, self.shop)
                     if self.game_state == "base_menu" and not self.base_ui.is_visible:
                         self.game_state = "play"
 

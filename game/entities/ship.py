@@ -48,6 +48,8 @@ class Ship():
         # player overall level need for upgrade and tings like this earnin by doing qests 
         self.lvl = 1
 
+        self.gold: int = 0
+
 
 
     def update(self,dt,world):

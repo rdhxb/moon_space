@@ -14,7 +14,7 @@ class MissionTracker:
             self.progress[mission_id] = target
             self.completed.add(mission_id)
             self.missions[mission_id]['is_compleated'] = True
-            self.player.lvl += 0.1
+            self.player.lvl += 0.5
             print(self.player.lvl)
             
             
@@ -71,6 +71,16 @@ class MissionTracker:
             self._mark_done_if_needed(mission_id)
 
 
+    def get_row(self, mission_id):
+        m = self.missions[mission_id]
+        prog = self.progress.get(mission_id, 0)
+        target = m["target"]
+        done = mission_id in self.completed
+        return (m["title"], prog, target, done)
+
+    def iter_rows(self):
+        for mission_id in self.missions:
+            yield mission_id, self.get_row(mission_id)
 
     def debug_msg(self):
         print(self.progress)
