@@ -87,7 +87,6 @@ class Game():
         self.player.draw(self.screen)
         
         self.renderer.draw_base(self.screen)
-        # self.renderer.draw_trees(self.screen)
         self.renderer.draw_sprites_helper(self.screen,'tree_image','tree_rect',self.world.trees)
         self.hud.draw(self.screen, self.game_state, self.near_base)
         
@@ -127,10 +126,9 @@ class Game():
                         if moved > 0:
                             self.world.iron_ores.remove(self.ore_tile)
                             self.mission.on_item_collected('iron_ore', qty_to_pick)
-                            self.mission.debug_msg()
+                            # self.mission.debug_msg()
                         else:
                             print('Brak miejsca w inventory')
-                            # self.player.inventory.debug_print(self.player)
                     
                     if event.key == pygame.K_i and self.invui.is_visible != True:
                         self.invui.is_visible = True
@@ -165,6 +163,7 @@ class Game():
         
             # sprawdź, czy jesteśmy przy bazie
             self.is_near_base()
+            
             self.is_near_ore()
 
             self.distance_count()

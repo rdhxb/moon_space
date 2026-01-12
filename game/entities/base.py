@@ -38,7 +38,6 @@ class Base():
 
             moved_by_item[s.item_id] = moved_by_item.get(s.item_id, 0) + moved
 
-        print(f'moved  by item -> {moved_by_item}')
         return moved_by_item
 
 

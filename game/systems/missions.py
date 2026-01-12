@@ -15,7 +15,6 @@ class MissionTracker:
             self.completed.add(mission_id)
             self.missions[mission_id]['is_compleated'] = True
             self.player.lvl += 0.5
-            print(self.player.lvl)
             
             
 

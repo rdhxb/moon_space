@@ -16,5 +16,4 @@ class Shop:
         earned = sold * price
 
         player.gold += earned
-        print(sold, earned, player.gold)
         return sold, earned
