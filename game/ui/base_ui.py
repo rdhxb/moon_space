@@ -230,7 +230,7 @@ class BaseUI():
         screen.blit(surf, (x, y))
 
     
-    def draw_missions(self,screen,missions):
+    def draw_missions(self, screen, missions):
         x = self.x + 80
         y = self.y + 140
         line_h = 30
@@ -243,16 +243,17 @@ class BaseUI():
                 text = f"{title}  DONE"
             else:
                 color = self.col_in_progress
-                # prog może być float
-                if isinstance(prog, float):
-                    p = int(prog)
-                else:
-                    p, t = prog, target
+                
+                p = int(prog)
+                t = int(target)
+
                 text = f"{title}: {p}/{t}"
 
             surf = self.font.render(text, True, color)
             screen.blit(surf, (x, y))
             y += line_h
+
+            
 
     def draw_shop_hints(self, base, ITEMS, screen ,):
         hx = self.x + 70
