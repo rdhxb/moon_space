@@ -27,15 +27,19 @@ class Base():
         return moved
         
     def deposit_all(self, player_inv):
-        moved_total = 0
+        moved_by_item = {}
 
         stacks = [s for s in player_inv.slots if s is not None and s.qty > 0]
 
-
         for s in stacks:
-            moved_total += self.depo_item(player_inv, s.item_id, s.qty)
+            moved = self.depo_item(player_inv, s.item_id, s.qty)
+            if moved <= 0:
+                continue
 
-        return moved_total
+            moved_by_item[s.item_id] = moved_by_item.get(s.item_id, 0) + moved
+
+        print(f'moved  by item -> {moved_by_item}')
+        return moved_by_item
 
 
         

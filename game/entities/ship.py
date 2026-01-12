@@ -45,6 +45,8 @@ class Ship():
         self.mining_lvl = 0
 
         self.inventory = Inventory(self.inv_slots)
+        # player overall level need for upgrade and tings like this earnin by doing qests 
+        self.lvl = 1
 
 
 

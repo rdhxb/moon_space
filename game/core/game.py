@@ -12,6 +12,8 @@ from ..systems.upgrade import UpgradeSystem
 from ..ui.inventory_ui import INVUI
 from ..ui.base_ui import BaseUI
 
+from ..systems.missions import MissionTracker
+
 pygame.init()
 
 class Game():
@@ -27,9 +29,6 @@ class Game():
         self.running = True
         self.color = (0,0,0)
         validate_items()
-
-        
-
 
         self.world = WorldMap()
         self.tree = self.world.create_tree()
@@ -63,6 +62,11 @@ class Game():
         self.upgrade = UpgradeSystem(self.player,self.base.storage)
 
         self.base_ui = BaseUI(self.width, self.height)
+
+        self.mission = MissionTracker()
+
+        self.prev_tx = self.player.tx
+        self.prev_ty = self.player.ty
 
 
     # draw everything on the screen like player world ect. 
@@ -109,6 +113,8 @@ class Game():
 
                         if moved > 0:
                             self.world.iron_ores.remove(self.ore_tile)
+                            self.mission.on_item_collected('iron_ore', qty_to_pick)
+                            self.mission.debug_msg()
                         else:
                             print('Brak miejsca w inventory')
                             # self.player.inventory.debug_print(self.player)
@@ -120,7 +126,7 @@ class Game():
 
                 
                 elif self.game_state == 'base_menu':
-                    self.base_ui.handle_event(event,self.base, self.player,self.upgrade)
+                    self.base_ui.handle_event(event,self.base, self.player,self.upgrade, self.mission)
                     if self.game_state == "base_menu" and not self.base_ui.is_visible:
                         self.game_state = "play"
 
@@ -143,6 +149,9 @@ class Game():
             self.is_near_base()
             self.is_near_ore()
 
+            self.distance_count()
+            
+
 
     def is_near_base(self):
         base_tx, base_ty = self.world.base_pos
@@ -164,6 +173,17 @@ class Game():
         else:
             self.near_ore = False
             self.ore_tile = None
+
+    def distance_count(self):
+        dx = self.player.tx - self.prev_tx
+        dy = self.player.ty - self.prev_ty
+        dist = (dx*dx + dy*dy) ** 0.5
+
+        if dist > 0:
+            self.mission.on_distance(dist)
+
+        self.prev_tx = self.player.tx
+        self.prev_ty = self.player.ty
 
         
 

@@ -40,7 +40,7 @@ class BaseUI():
         self.is_visible = False
     
 
-    def handle_event(self, event, base, player, upg):
+    def handle_event(self, event, base, player, upg, mission):
         if not self.is_visible:
             return
 
@@ -52,13 +52,18 @@ class BaseUI():
                     self.base_state = "home"
             elif event.key == pygame.K_p:
                 self.base_state = "storage"
+                mission.on_ui_open('storage')
             elif event.key == pygame.K_u:
                 self.base_state = "upgrade"
+                
             elif event.key == pygame.K_q:
                 self.base_state = "missions"
             
             if event.key == pygame.K_d and self.base_state == 'storage':
-                base.deposit_all(player.inventory)
+                moved = base.deposit_all(player.inventory)
+                for item_id, qty in moved.items():
+                    if qty > 0:
+                        mission.on_item_depo(item_id, qty)
 
             if event.key == pygame.K_b and self.base_state == 'upgrade':
                 upg.try_upgrade('backpack')
