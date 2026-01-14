@@ -16,11 +16,13 @@ from ..systems.missions import MissionTracker
 
 from ..ui.player_ui import PlayerUI
 
-from ..systems.shop import Shop
+from ..systems.cantor import Cantor
 from ..ui.tutorial import Tutorial
 from ..systems.planet_menageer import PlanetManager
 
 from ..world.planets import build_world
+
+from ..systems.shop import Shop
 pygame.init()
 
 class Game():
@@ -80,11 +82,13 @@ class Game():
         self.prev_ty = self.player.ty
 
         self.player_ui = PlayerUI()
-        self.shop = Shop()
+        self.cantor = Cantor()
 
         self.tutuorial = Tutorial(self.width,self.height)
 
         self.planet_menager = PlanetManager()
+
+        self.shop = Shop()
 
 
     # draw everything on the screen like player world ect. 
@@ -106,7 +110,7 @@ class Game():
             self.invui.draw(self.screen,self.player.inventory,self.width//2 - (32.5 * self.player.inv_slots),(self.height // 2) - 200 , 6)
 
 
-        self.base_ui.draw(self.invui,self.base,self.player,self.screen,self.upgrade,self.mission)
+        self.base_ui.draw(self.invui,self.base,self.player,self.screen,self.upgrade,self.mission, self.shop)
 
         self.player_ui.draw_player_current_stats(self.screen,self.font,self.player)
 
@@ -125,6 +129,7 @@ class Game():
                     if event.key == pygame.K_e and self.near_base:
                         self.game_state = 'base_menu'
                         self.base_ui.open()
+                        self.player.fuel = self.player.max_fuel
 
                     if event.key == pygame.K_e and self.near_ore and self.ore_tile != None:
                         qty_to_pick = (1 * self.player.mining_lvl) + 1
@@ -154,7 +159,7 @@ class Game():
                             self.load_planet('mars')
                 
                 elif self.game_state == 'base_menu':
-                    self.base_ui.handle_event(event,self.base, self.player,self.upgrade, self.mission, self.shop)
+                    self.base_ui.handle_event(event,self.base, self.player,self.upgrade, self.mission, self.cantor, self.shop)
                     if self.game_state == "base_menu" and not self.base_ui.is_visible:
                         self.game_state = "play"
 

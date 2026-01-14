@@ -54,6 +54,10 @@ class Ship():
         self._angle_step_deg = 3    
         self._scale = 1.5
 
+        self.max_fuel = 10
+        self.fuel = self.max_fuel
+        self.fuel_burn_per_px = 0.05
+
 
 
     def update(self,dt,world):
@@ -89,6 +93,18 @@ class Ship():
             diff = -max_step
 
         self.angle_deg += diff
+
+        dx = self.tx - old_tx
+        dy = self.ty - old_ty
+        dist = (dx*dx + dy*dy) ** 0.5
+
+        if dist > 0:
+            burn = dist * self.fuel_burn_per_px
+            self.fuel = max(0, self.fuel - burn)
+
+        if self.fuel == 0:
+            self.speed = 2
+        # print(self.fuel)
 
 
 
@@ -126,6 +142,7 @@ class Ship():
         # ruch w świecie
         self.tx += self.vx * self.speed * dt
         self.ty += self.vy * self.speed * dt
+
 
         # obrot statku
         angle_rad = atan2(-self.vy, self.vx)  

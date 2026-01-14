@@ -9,7 +9,7 @@ class BaseUI():
         self.base_storage_img = pygame.image.load('game/data/assets/base/base_storage.png').convert_alpha()
         self.base_upgrade_img = pygame.image.load('game/data/assets/base/base_upgrade.png').convert_alpha()
         self.base_mission_img = pygame.image.load('game/data/assets/base/base_mission.png').convert_alpha()
-        self.base_shop_img = pygame.image.load('game/data/assets/base/base_shop.png').convert_alpha()
+        self.base_cantor_img = pygame.image.load('game/data/assets/base/base_shop.png').convert_alpha()
 
 
         self.panel_w = 900
@@ -38,13 +38,17 @@ class BaseUI():
         self.col_done_mission = (40, 200, 80)   # zielony (albo szary jeśli wolisz)
 
         # index in stack 
-        self.shop_selected_item = 0
-        self.shop_qty = 0
-        self.shop_msg = ''
-        self.shop_item_qty = False
-        self.shop_item_id = None
+        self.cantor_selected_item = 0
+        self.cantor_qty = 0
+        self.cantor_msg = ''
+        self.cantor_item_qty = False
+        self.cantor_item_id = None
 
         self.items = ITEMS
+
+        self.gold_selected_idx = 0
+        self.gold_msg = ""
+        self.gold_msg_until = 0
 
 
 
@@ -56,7 +60,7 @@ class BaseUI():
         self.is_visible = False
     
 
-    def handle_event(self, event, base, player, upg, mission, shop):
+    def handle_event(self, event, base, player, upg, mission, cantor, gold_shop):
         if not self.is_visible:
             return
 
@@ -74,8 +78,10 @@ class BaseUI():
             elif event.key == pygame.K_q:
                 self.base_state = "missions"
             elif event.key == pygame.K_s:
-                self.base_state = 'shop'
-                
+                self.base_state = 'cantor'
+            elif event.key == pygame.K_v:
+                self.base_state = 'gold_shop'
+                self.gold_selected_idx = 0
             
             if event.key == pygame.K_d and self.base_state == 'storage':
                 moved = base.deposit_all(player.inventory)
@@ -89,49 +95,71 @@ class BaseUI():
             if event.key == pygame.K_m and self.base_state == 'upgrade':
                 upg.try_upgrade('mining')
 
-            if self.base_state == 'shop' and self.shop_item_qty == False:
-                if event.key == pygame.K_RIGHT:
-                    self.shop_selected_item += 1
-                if event.key == pygame.K_LEFT and self.shop_selected_item >=1:
-                    self.shop_selected_item -= 1
+            if self.base_state == 'gold_shop':
+                items = list(gold_shop.upgrades.items())
+                if not items:
+                    return
+
+                if self.gold_selected_idx >= len(items):
+                    self.gold_selected_idx = len(items) - 1
+                if self.gold_selected_idx < 0:
+                    self.gold_selected_idx = 0
+
                 if event.key == pygame.K_DOWN:
-                    self.shop_selected_item += 5
-                if event.key == pygame.K_UP and self.shop_selected_item >= 5:
-                    self.shop_selected_item -= 5
+                    self.gold_selected_idx = (self.gold_selected_idx + 1) % len(items)
+
+                elif event.key == pygame.K_UP:
+                    self.gold_selected_idx = (self.gold_selected_idx - 1) % len(items)
+
+                elif event.key == pygame.K_RETURN:
+                    upg_id, data = items[self.gold_selected_idx]
+                    gold_shop.buy_upgrade(upg_id, player)
+                    self.gold_msg = f"Bought: {data.get('title', upg_id)}"
+                    self.gold_msg_until = pygame.time.get_ticks() + 1200
+
+            if self.base_state == 'cantor' and self.cantor_item_qty == False:
+                if event.key == pygame.K_RIGHT:
+                    self.cantor_selected_item += 1
+                if event.key == pygame.K_LEFT and self.cantor_selected_item >=1:
+                    self.cantor_selected_item -= 1
+                if event.key == pygame.K_DOWN:
+                    self.cantor_selected_item += 5
+                if event.key == pygame.K_UP and self.cantor_selected_item >= 5:
+                    self.cantor_selected_item -= 5
 
                 if event.key == pygame.K_SPACE:
-                    slot = base.storage.slots[self.shop_selected_item]
+                    slot = base.storage.slots[self.cantor_selected_item]
                     if slot is None:
                         return  # albo po prostu nic nie rób
-                    self.shop_item_qty = True
-                    self.shop_item_id = slot.item_id
-                    self.shop_qty = 1
-            if event.key == pygame.K_ESCAPE and self.base_state == 'shop':
-                self.shop_item_qty = False
+                    self.cantor_item_qty = True
+                    self.cantor_item_id = slot.item_id
+                    self.cantor_qty = 1
+            if event.key == pygame.K_ESCAPE and self.base_state == 'cantor':
+                self.cantor_item_qty = False
                 
-            if self.shop_item_qty:
+            if self.cantor_item_qty:
                 if event.key == pygame.K_RIGHT:
-                    self.shop_qty += 1
+                    self.cantor_qty += 1
                 elif event.key == pygame.K_LEFT:
-                    self.shop_qty -= 1
+                    self.cantor_qty -= 1
                 elif event.key == pygame.K_UP:
-                    self.shop_qty += 5
+                    self.cantor_qty += 5
                 
-            max_have = base.storage.count(self.shop_item_id)
-            if self.shop_qty > max_have:
-                self.shop_qty = max_have
+            max_have = base.storage.count(self.cantor_item_id)
+            if self.cantor_qty > max_have:
+                self.cantor_qty = max_have
                 
-            if self.shop_item_qty and event.key == pygame.K_RETURN:
-                sold, earned = shop.sell(base.storage, self.shop_item_id, self.shop_qty, player)
-                self.shop_item_qty = False
-                self.shop_item_id = None
-                self.shop_qty = 1
+            if self.cantor_item_qty and event.key == pygame.K_RETURN:
+                sold, earned = cantor.sell(base.storage, self.cantor_item_id, self.cantor_qty, player)
+                self.cantor_item_qty = False
+                self.cantor_item_id = None
+                self.cantor_qty = 1
 
                         
                     
 
         
-    def draw(self,invui,base,player, screen : pygame.Surface, upgrade_sys, missions):
+    def draw(self,invui,base,player, screen : pygame.Surface, upgrade_sys, missions, shop):
         if not self.is_visible:
             return
         screen.blit(self.dim, (0, 0))
@@ -148,14 +176,18 @@ class BaseUI():
             screen.blit(self.base_mission_img,(self.x,self.y))
             self.draw_missions(screen, missions)
 
-        if self.base_state == 'shop':
-            screen.blit(self.base_shop_img,(self.x,self.y))
+        if self.base_state == 'cantor':
+            screen.blit(self.base_cantor_img,(self.x,self.y))
             storage_rects = invui.draw(screen,base.storage,self.x + 500 ,self.y + 120 , 5, return_rect = True)
             if storage_rects:
-                idx = self.shop_selected_item
+                idx = self.cantor_selected_item
                 if 0 <= idx < len(storage_rects):
                     pygame.draw.rect(screen, (255, 255, 0), storage_rects[idx], 3, border_radius=6)
-            self.draw_shop_hints(base,self.items,screen)
+            self.draw_cantor_hints(base,self.items,screen)
+
+        if self.base_state == 'gold_shop':
+            screen.blit(self.base_cantor_img,(self.x,self.y))
+            self.draw_gold_shop(screen, shop.upgrades,player)
 
 
 
@@ -253,38 +285,86 @@ class BaseUI():
             screen.blit(surf, (x, y))
             y += line_h
 
+    def draw_gold_shop(self, screen: pygame.Surface, shop: dict, player):
+        x0 = self.x + 90
+        y0 = self.y + 140
+        line_h = 34
+
+        col_left_w = 360
+        col_right_w = 50  
+        gap = 30
+
+        # headers
+        screen.blit(self.font.render("Upgrade", True, self.col_white), (x0, y0))
+        screen.blit(self.font.render("Price", True, self.col_white), (x0 + col_left_w + gap, y0))
+        y = y0 + line_h
+
+        
+        items = list(shop.items())
+        row_w = col_left_w + gap + col_right_w
+        for i, (upg_id, data) in enumerate(items):
+            title = data.get("title", upg_id)
+            price = data.get("price", 0)
+
+            can_buy = getattr(player, "gold", 0) >= price
+            color = self.col_ok if can_buy else self.col_no
+
+            left_surf = self.font.render(title, True, color)
+            screen.blit(left_surf, (x0, y))
+
+            price_txt = f"{int(price)}g"
+            right_surf = self.font.render(price_txt, True, color)
+            right_x = x0 + col_left_w + gap + col_right_w - right_surf.get_width()
+            screen.blit(right_surf, (right_x, y))
+            if i == self.gold_selected_idx:
+                hi = pygame.Surface((row_w + 16, line_h), pygame.SRCALPHA)
+                hi.fill((255, 255, 255, 20))
+                screen.blit(hi, (x0 - 8, y - 4))
+                pygame.draw.rect(screen, (255, 255, 0), (x0 - 8, y - 4, row_w + 16, line_h), 2, border_radius=6)
+
+            y += line_h
+
+        hint = "UP/DOWN to select   ENTER to buy"
+        hint_surf = self.font.render(hint, True, self.col_hint_dim)
+
+        hx = self.x + 70
+        hy = self.y + self.panel_h - 60  
+        screen.blit(hint_surf, (hx, hy))
+
+
+
             
 
-    def draw_shop_hints(self, base, ITEMS, screen ,):
+    def draw_cantor_hints(self, base, ITEMS, screen ,):
         hx = self.x + 70
         hy = self.y + 260
         lh = 22
 
         lines = []
 
-        if not self.shop_item_qty:
-            lines.append(("SHOP", self.col_hint))
+        if not self.cantor_item_qty:
+            lines.append(("cantor", self.col_hint))
             lines.append(("Select slot: Arrow keys", self.col_hint))
             lines.append(("Accept slot: SPACE", self.col_hint))
             lines.append(("Sell: ENTER (after choosing qty)", self.col_hint_dim))
         else:
-            lines.append(("SHOP", self.col_hint))
+            lines.append(("cantor", self.col_hint))
             lines.append(("Select qty: LEFT / RIGHT", self.col_hint))
             lines.append(("Sell: ENTER", self.col_hint))
             lines.append(("Cancel: ESC", self.col_hint_dim))
 
         
         profit_line = None
-        if self.shop_item_id:
+        if self.cantor_item_id:
             
-            have = base.storage.count(self.shop_item_id)
-            qty = max(1, min(self.shop_qty, have))
+            have = base.storage.count(self.cantor_item_id)
+            qty = max(1, min(self.cantor_qty, have))
 
             
-            price = ITEMS[self.shop_item_id]["value"] 
+            price = ITEMS[self.cantor_item_id]["value"] 
             earned = qty * price
 
-            profit_line = f"Selected: {self.shop_item_id} | Qty: {qty} | Earn: {earned}g"
+            profit_line = f"Selected: {self.cantor_item_id} | Qty: {qty} | Earn: {earned}g"
 
         for i, (txt, col) in enumerate(lines):
             screen.blit(self.font.render(txt, True, col), (hx, hy + i * lh))
