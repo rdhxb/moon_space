@@ -53,7 +53,13 @@ class WorldMap():
         self.iron_ores = []
         self.ores_amount = 30
 
+        self.objects_by_type = {
+            "tree": set(),
+            "ore_iron": set()
+        }
 
+
+        self.blocked_tiles = set() 
 
     def get_tile(self, tx, ty):
         # poza mapą = ściana
@@ -86,7 +92,13 @@ class WorldMap():
         for _ in range(self.trees_amount):
             pos = choice(self.free_tiles)
             self.trees.append(pos)
+            self.objects_by_type["tree"].add(pos)
+
+            # drzewa blokują ruch:
+            self.blocked_tiles.add(pos)
+
             self.free_tiles.remove(pos)
+
             
 
 
@@ -94,7 +106,11 @@ class WorldMap():
         for _ in range(self.ores_amount):
             pos = choice(self.free_tiles)
             self.iron_ores.append(pos)
+            self.objects_by_type["ore_iron"].add(pos)
             self.free_tiles.remove(pos)
+
         
-                 
+    def is_blocked(self, tx, ty):
+        return self.get_tile(tx, ty) == 1 or (tx, ty) in self.blocked_tiles
+
             

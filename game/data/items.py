@@ -7,16 +7,32 @@ ITEMS = {
         "value": 4,
         "description": "Podstawowy surowiec do rafinacji i craftingu.",
     },
-    "copper_ore": {
-        "name": "Ruda miedzi",
+
+    # --- MARS ORES ---
+    "hematite_ore": {
+        "name": "Ruda hematytu",
         "category": "resource",
         "stack_max": 50,
-        "value": 5,
-        "description": "Przydatna do elektroniki i przewodników.",
-        "icon": "game/data/assets/copper_ore.png",
+        "value": 6,
+        "description": "Bogata w żelazo ruda marsjańska. Dobra do rafinacji.",
+    },
+
+    "ferrosilicate_ore": {
+        "name": "Ruda żelazokrzemianów",
+        "category": "resource",
+        "stack_max": 50,
+        "value": 7,
+        "description": "Złoże żelazokrzemianowe. Może wymagać lepszej rafinacji.",
+    },
+
+    "sulfide_ore": {
+        "name": "Ruda siarczkowa",
+        "category": "resource",
+        "stack_max": 50,
+        "value": 9,
+        "description": "Ruda siarczkowa z domieszkami metali. Cenniejsza od podstawowej.",
     },
 }
-
 
 def get_item(item_id: str) -> dict:
     return ITEMS[item_id]

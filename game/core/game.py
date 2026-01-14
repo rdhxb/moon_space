@@ -1,7 +1,7 @@
 import pygame
 from ..entities.ship import Ship
 from ..world.world_map import WorldMap
-from ..render.TileSet import TileSet
+from ..render.TileSets import MoonTileSet, MarsTileSet
 from ..render.iso_render import IsoRender
 from ..render.camera import Camera
 from ..ui.hud import HUD
@@ -40,15 +40,13 @@ class Game():
         validate_items()
 
         self.world = build_world('moon')
-        self.tree = self.world.create_tree()
-        self.iron_ore = self.world.create_iron_ores()
 
 
         cx = self.world.width_in_tiles  / 2
         cy = self.world.height_in_tiles / 2
         self.player = Ship(cx, cy)
 
-        self.tile_set = TileSet()
+        self.tile_set = MoonTileSet()
         self.camera = Camera()
 
         self.renderer = IsoRender(self.world, self.camera, self.tile_set)
@@ -90,16 +88,28 @@ class Game():
 
         self.shop = Shop()
 
+        self.near_obj_tile = None
+        self.near_obj_type = None 
+
+        self.mineable_types = {
+            "ore_iron",
+            "red_hematite_ore",
+            "ferrosilicate_ore",
+            "sulfide_vein_ore",
+        }
+
+
+
 
     # draw everything on the screen like player world ect. 
     def draw(self):
         self.screen.fill(self.color)
         self.renderer.draw_world(self.screen)
-        self.renderer.draw_sprites_helper(self.screen,'iron_ore_img','iron_ore_rect',self.world.iron_ores)
+        self.renderer.draw_objects(self.screen, self.world.objects_by_type)
+
         self.player.draw(self.screen)
         
         self.renderer.draw_base(self.screen)
-        self.renderer.draw_sprites_helper(self.screen,'tree_image','tree_rect',self.world.trees)
         self.hud.draw(self.screen, self.game_state, self.near_base)
         
         if self.near_ore:
@@ -131,17 +141,27 @@ class Game():
                         self.base_ui.open()
                         self.player.fuel = self.player.max_fuel
 
-                    if event.key == pygame.K_e and self.near_ore and self.ore_tile != None:
+                    if event.key == pygame.K_e and self.near_ore and self.ore_tile is not None and self.near_obj_type is not None:
                         qty_to_pick = (1 * self.player.mining_lvl) + 1
-                        leftover = self.player.inventory.add('iron_ore', qty_to_pick)
+
+                        sprite_to_item = {
+                            "ore_iron": "iron_ore",
+                            "red_hematite_ore": "hematite_ore",
+                            "ferrosilicate_ore": "ferrosilicate_ore",
+                            "sulfide_vein_ore": "sulfide_ore",
+                        }
+
+                        item_id = sprite_to_item.get(self.near_obj_type, "iron_ore")
+
+                        leftover = self.player.inventory.add(item_id, qty_to_pick)
                         moved = qty_to_pick - leftover
 
                         if moved > 0:
-                            self.world.iron_ores.remove(self.ore_tile)
-                            self.mission.on_item_collected('iron_ore', qty_to_pick)
-                            # self.mission.debug_msg()
+                            self.world.objects_by_type[self.near_obj_type].remove(self.ore_tile)
+                            self.mission.on_item_collected(item_id, qty_to_pick)
                         else:
-                            print('Brak miejsca w inventory')
+                            print("Brak miejsca w inventory")
+
                     
                     if event.key == pygame.K_i and self.invui.is_visible != True:
                         self.invui.is_visible = True
@@ -198,12 +218,22 @@ class Game():
         px, py = self.player.tile_x, self.player.tile_y
         tile = (px, py)
 
-        if tile in self.world.iron_ores:
-            self.near_ore = True
-            self.ore_tile = tile
-        else:
-            self.near_ore = False
-            self.ore_tile = None
+        self.near_ore = False
+        self.ore_tile = None
+        self.near_obj_type = None
+
+        objects = getattr(self.world, "objects_by_type", None)
+        if not objects:
+            return
+
+        for t in self.mineable_types:
+            positions = objects.get(t)
+            if positions and tile in positions:
+                self.near_ore = True
+                self.ore_tile = tile
+                self.near_obj_type = t
+                return
+
 
     def distance_count(self):
         dx = self.player.tx - self.prev_tx
@@ -217,43 +247,55 @@ class Game():
         self.prev_ty = self.player.ty
 
         
-    def load_planet(self,planet_id):
+    def load_planet(self, planet_id):
         self.world = build_world(planet_id)
 
-        self.world.create_tree()
-        self.world.create_iron_ores()
+        if planet_id == "mars":
+            self.tile_set = MarsTileSet()
+        else:
+            self.tile_set = MoonTileSet()
 
-        self.renderer.world = self.world
-        self.renderer.base_pos = self.world.base_pos
+        
+        self.renderer = IsoRender(self.world, self.camera, self.tile_set)
 
+        
+        self.hud.renderer = self.renderer
+        self.invui = INVUI(self.tile_set, self.width, self.height)
+
+        # baza (po world)
         bx, by = self.world.base_pos
         self.base = Base(bx, by, 30)
-
         self.upgrade = UpgradeSystem(self.player, self.base.storage)
 
+        # teleport gracza obok bazy
         self.player.tx = bx + 1
         self.player.ty = by + 1
         self.player.tile_x = int(self.player.tx)
         self.player.tile_y = int(self.player.ty)
 
+        # reset stanów interakcji
         self.near_base = False
         self.near_ore = False
         self.ore_tile = None
+        self.near_obj_type = None
 
         self.prev_tx = self.player.tx
         self.prev_ty = self.player.ty
 
+        # UI state
         self.base_ui.close()
         self.invui.is_visible = False
         self.game_state = "play"
 
+        # kamera na gracza
         iso_x, iso_y = self.player.get_iso_pos(self.renderer.tile_w, self.renderer.tile_h)
         self.camera.center_on(iso_x, iso_y, self.width, self.height)
 
+        # misje / planet manager
         self.mission = MissionTracker(self.player)
         self.mission.set_planet(planet_id)
-
         self.planet_menager.set_current(planet_id)
+
 
     # run the game just a funct
     def run(self):

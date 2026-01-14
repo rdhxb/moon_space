@@ -22,6 +22,9 @@ class IsoRender():
         self._tile_cache = {}          
         self._cache_zoom_key = None   
 
+        self._sprite_cache = {}
+        self._sprite_cache_zoom_key = None
+
 
     def tile_to_screen(self, tx, ty):
         half_w = self.tile_w //2
@@ -233,6 +236,82 @@ class IsoRender():
 
         self._tile_cache[key] = surf
         return surf
+
+
+    def draw_objects(self, screen: pygame.Surface, objects_by_type: dict):
+        if not objects_by_type:
+            return
+
+        sw, sh = screen.get_size()
+        cx, cy = sw // 2, sh // 2
+        zoom = self.camera.zoom
+        zoom_key = round(zoom, 2)
+
+        if self._sprite_cache_zoom_key != zoom_key:
+            self._sprite_cache.clear()
+            self._sprite_cache_zoom_key = zoom_key
+
+        h = self.world.height_in_tiles
+        w = self.world.width_in_tiles
+
+        tiles_x = int((sw / (self.tile_w * zoom)) * 2) + 8
+        tiles_y = int((sh / (self.tile_h * zoom)) * 2) + 8
+
+        center_tx = getattr(self.world, "center_tx", w // 2)
+        center_ty = getattr(self.world, "center_ty", h // 2)
+
+        min_tx = max(0, center_tx - tiles_x)
+        max_tx = min(w - 1, center_tx + tiles_x)
+        min_ty = max(0, center_ty - tiles_y)
+        max_ty = min(h - 1, center_ty + tiles_y)
+
+        draw_list = []
+        for sprite_id, positions in objects_by_type.items():
+            for (tx, ty) in positions:
+                if tx < min_tx or tx > max_tx or ty < min_ty or ty > max_ty:
+                    continue
+                draw_list.append((tx + ty, ty, tx, sprite_id))
+
+        draw_list.sort()
+
+        # rysowanie
+        for _, ty, tx, sprite_id in draw_list:
+            if hasattr(self.tile_set, "get_sprite"):
+                base_img = self.tile_set.get_sprite(sprite_id)
+            else:
+                base_img = getattr(self.tile_set, sprite_id, None)
+
+            if base_img is None:
+                continue
+            cache_key = (sprite_id, zoom_key)
+            img = self._sprite_cache.get(cache_key)
+            if img is None:
+                if zoom_key == 1.0:
+                    img = base_img
+                else:
+                    tw = int(base_img.get_width() * zoom_key)
+                    th = int(base_img.get_height() * zoom_key)
+                    if tw <= 0 or th <= 0:
+                        continue
+                    img = pygame.transform.smoothscale(base_img, (tw, th))
+                self._sprite_cache[cache_key] = img
+
+            
+            sx, sy = self.tile_to_screen(tx, ty)
+            sxz = cx + (sx - cx) * zoom
+            syz = cy + (sy - cy) * zoom
+
+            if zoom_key == 1.0:
+                offset_x = base_img.get_width() / 2
+                offset_y = (base_img.get_height() - self.tile_h)
+            else:
+                offset_x = (base_img.get_width() / 2) * zoom
+                offset_y = (base_img.get_height() - self.tile_h) * zoom
+
+            draw_x = sxz - offset_x
+            draw_y = syz - offset_y
+            screen.blit(img, (draw_x, draw_y))
+
 
 
 

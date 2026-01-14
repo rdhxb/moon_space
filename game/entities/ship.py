@@ -15,6 +15,7 @@ class Ship():
         self.width = 32
         self.height = 32
 
+        self.base_speed = 5
         self.speed = 5
         self.color = (255,0,255)
 
@@ -60,38 +61,30 @@ class Ship():
 
 
 
-    def update(self,dt,world):
+    def update(self, dt, world):
         old_tx, old_ty = self.tx, self.ty
 
         self.handle_input(dt)
 
+        test_tx = self.tx
+        test_ty = old_ty
+        if world.is_blocked(int(test_tx), int(test_ty)):
+            self.tx = old_tx
+
+        test_tx = self.tx
+        test_ty = self.ty
+        if world.is_blocked(int(test_tx), int(test_ty)):
+            self.ty = old_ty
+
         self.tile_x = int(self.tx)
         self.tile_y = int(self.ty)
-        
-        get_tile = world.get_tile(self.tile_x,self.tile_y)
 
-        if get_tile == 1:
-            self.tx, self.ty = old_tx, old_ty
-            self.tile_x = int(self.tx)
-            self.tile_y = int(self.ty)
-
-        if (self.tile_x , self.tile_y) in world.trees:
-            self.tx, self.ty = old_tx, old_ty
-            self.tile_x = int(self.tx)
-            self.tile_y = int(self.ty)
-
-
-
-        # ship rotation using shortest path not faster then roptation speed 
         diff = (self.angle_target - self.angle_deg + 180) % 360 - 180
-
         max_step = self.rotation_speed * dt
-
         if diff > max_step:
             diff = max_step
         elif diff < -max_step:
             diff = -max_step
-
         self.angle_deg += diff
 
         dx = self.tx - old_tx
@@ -104,7 +97,9 @@ class Ship():
 
         if self.fuel == 0:
             self.speed = 2
-        # print(self.fuel)
+        else:
+            self.speed = self.base_speed
+
 
 
 
