@@ -3,13 +3,53 @@ import pygame
 from ..data.items import ITEMS
 class BaseUI():
     def __init__(self, screen_w, screen_h):
+        self.home_title = "base"
+        self.home_menu = [
+            ("[p] storage",   "deposit items"),
+            ("[u] upgrade",   "buy backpack / mining upgrades"),
+            ("[q] missions",  "show progress"),
+            ("[s] cantor",    "sell items for gold"),
+            ("[v] gold shop", "buy gold upgrades"),
+            ("[e] close",     "close / return"),
+        ]
+        # Opisy per ekran: 1–2 linie, bez ramek
+        self.state_title = {
+            "storage": "storage",
+            "upgrade": "upgrade",
+            "missions": "missions",
+            "cantor": "cantor",
+            "gold_shop": "gold shop",
+        }
 
-        self.base_home_img = pygame.image.load('game/data/assets/base/base_home.png').convert_alpha()
-        self.base_home_rect = self.base_home_img.get_rect()
-        self.base_storage_img = pygame.image.load('game/data/assets/base/base_storage.png').convert_alpha()
-        self.base_upgrade_img = pygame.image.load('game/data/assets/base/base_upgrade.png').convert_alpha()
-        self.base_mission_img = pygame.image.load('game/data/assets/base/base_mission.png').convert_alpha()
-        self.base_cantor_img = pygame.image.load('game/data/assets/base/base_shop.png').convert_alpha()
+        self.state_help_lines = {
+            "storage": [
+                "[d] deposit all items   [e] return",
+                "deposit items from inventory into base storage",
+            ],
+            "upgrade": [
+                "[b] buy backpack upgrade   [m] buy mining upgrade   [e] exit",
+                "spend stored materials to upgrade backpack and mining level U have to had min same lvl as upg",
+            ],
+            "missions": [
+                "[e] exit",
+                "check mission progress and completion status",
+            ],
+            "cantor": [
+                "select slot: arrows   accept slot: space   sell: enter   cancel: esc",
+                "sell items from storage to earn gold",
+            ],
+            "gold_shop": [
+                "select: up/down   buy: enter   [e] return",
+                "buy special upgrades using gold",
+            ],
+        }
+
+
+        self.base_bg = pygame.image.load('game/data/assets/base/base_bg.png').convert_alpha()
+
+        self.deafult_img_size = (900,600)
+        self.base_bg = pygame.transform.smoothscale(self.base_bg,self.deafult_img_size)
+        self.base_bg = self.round_corners(self.base_bg,24)
 
 
         self.panel_w = 900
@@ -26,6 +66,10 @@ class BaseUI():
         self.dim.fill((0,0,0,140))
 
         self.font = pygame.font.SysFont("Comic Sans MS", 22, bold=True)
+        self.font_title = pygame.font.SysFont("Comic Sans MS", 48, bold=True)
+        self.font_menu  = pygame.font.SysFont("Comic Sans MS", 34, bold=True)
+        self.font_small = pygame.font.SysFont("Comic Sans MS", 24, bold=True)
+
         self.col_ok = (40, 200, 80)     # zielony
         self.col_no = (220, 60, 60)     # czerwony
         self.col_done = (30, 30, 30)    # czarny / ciemny
@@ -40,15 +84,12 @@ class BaseUI():
         # index in stack 
         self.cantor_selected_item = 0
         self.cantor_qty = 0
-        self.cantor_msg = ''
         self.cantor_item_qty = False
         self.cantor_item_id = None
 
         self.items = ITEMS
 
         self.gold_selected_idx = 0
-        self.gold_msg = ""
-        self.gold_msg_until = 0
 
 
 
@@ -165,34 +206,47 @@ class BaseUI():
         screen.blit(self.dim, (0, 0))
 
         if self.base_state == 'home':
-            screen.blit(self.base_home_img,(self.x,self.y))
+            screen.blit(self.base_bg, (self.x, self.y))
+            self.draw_home(screen)
 
         if self.base_state == 'storage':
-            screen.blit(self.base_storage_img,(self.x,self.y))
+            screen.blit(self.base_bg,(self.x,self.y))
+            self.draw_state_help(screen)
+
             invui.draw(screen,player.inventory,550,340 , 5)
             invui.draw(screen,base.storage,1000 ,340, 5)
 
+
+
         if self.base_state == 'missions':
-            screen.blit(self.base_mission_img,(self.x,self.y))
+            screen.blit(self.base_bg,(self.x,self.y))
             self.draw_missions(screen, missions)
+            self.draw_state_help(screen)
+
 
         if self.base_state == 'cantor':
-            screen.blit(self.base_cantor_img,(self.x,self.y))
-            storage_rects = invui.draw(screen,base.storage,self.x + 500 ,self.y + 120 , 5, return_rect = True)
+            screen.blit(self.base_bg,(self.x,self.y))
+            self.draw_state_help(screen, base=base)
+
+            storage_rects = invui.draw(screen,base.storage,1000 ,340 , 5, return_rect = True)
             if storage_rects:
                 idx = self.cantor_selected_item
                 if 0 <= idx < len(storage_rects):
                     pygame.draw.rect(screen, (255, 255, 0), storage_rects[idx], 3, border_radius=6)
-            self.draw_cantor_hints(base,self.items,screen)
 
         if self.base_state == 'gold_shop':
-            screen.blit(self.base_cantor_img,(self.x,self.y))
+            screen.blit(self.base_bg,(self.x,self.y))
             self.draw_gold_shop(screen, shop.upgrades,player)
+            self.draw_state_help(screen)
+
+
 
 
 
         if self.base_state == 'upgrade':
-            screen.blit(self.base_upgrade_img, (self.x, self.y))
+            screen.blit(self.base_bg, (self.x, self.y))
+            self.draw_state_help(screen)
+
 
             tx = self.x + 80
             backpact_ty = self.y + 140
@@ -324,50 +378,78 @@ class BaseUI():
 
             y += line_h
 
-        hint = "UP/DOWN to select   ENTER to buy"
-        hint_surf = self.font.render(hint, True, self.col_hint_dim)
+    # to round base_bg
+    def round_corners(self, surf, radius):
+        w, h = surf.get_size()
 
-        hx = self.x + 70
-        hy = self.y + self.panel_h - 60  
-        screen.blit(hint_surf, (hx, hy))
+        # maska: białe (255) = widoczne, przezroczyste = ucięte
+        mask = pygame.Surface((w, h), pygame.SRCALPHA)
+        pygame.draw.rect(mask, (255, 255, 255, 255), (0, 0, w, h), border_radius=radius)
+
+        out = surf.copy().convert_alpha()
+        out.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        return out
+
+    # draw home text
+    def draw_home(self, screen):
+        title_s = self.font_title.render(self.home_title, True, self.col_white)
+        self._blit_center_x(screen, title_s, self.y + 35)
+
+        start_y = self.y + 150
+        line_h = 48
+        for i, (label, _desc) in enumerate(self.home_menu):
+            s = self.font_menu.render(f'{label}: {_desc}', True, self.col_hint)
+            self._blit_center_x(screen, s, start_y + i * line_h)
+    
+
+    # blit on the center 
+    def _blit_center_x(self, screen, surf, y):
+        cx = self.x + self.panel_w // 2
+        screen.blit(surf, (cx - surf.get_width() // 2, y))
+
+    # draw footer with info how to use fe deposit
+    def _draw_footer_lines(self, screen, lines, pad_left=60, pad_bottom=70):
+        # 1–2 linie na dole po LEWEJ, bez ramek
+        x = self.x + pad_left
+        y = self.y + self.panel_h - pad_bottom
+        for i, txt in enumerate(lines[:2]):
+            surf = self.font_small.render(txt, True, self.col_hint_dim)
+            screen.blit(surf, (x, y + i * 22))
 
 
+    # draw title
+    def draw_state_help(self, screen, base=None):
+        title = self.state_title.get(self.base_state, self.base_state)
+        title_s = self.font_title.render(title, True, self.col_white)
+        self._blit_center_x(screen, title_s, self.y + 35)
 
-            
+        lines = self.state_help_lines.get(self.base_state)
+        if not lines:
+            return
 
-    def draw_cantor_hints(self, base, ITEMS, screen ,):
-        hx = self.x + 70
-        hy = self.y + 260
-        lh = 22
+        # Cantor: druga linia dynamiczna (ile dostanie)
+        if self.base_state == "cantor" and base is not None:
+            lines = [
+                lines[0],
+                self._cantor_earn_line(base),
+            ]
 
-        lines = []
+        self._draw_footer_lines(screen, lines)
 
-        if not self.cantor_item_qty:
-            lines.append(("cantor", self.col_hint))
-            lines.append(("Select slot: Arrow keys", self.col_hint))
-            lines.append(("Accept slot: SPACE", self.col_hint))
-            lines.append(("Sell: ENTER (after choosing qty)", self.col_hint_dim))
-        else:
-            lines.append(("cantor", self.col_hint))
-            lines.append(("Select qty: LEFT / RIGHT", self.col_hint))
-            lines.append(("Sell: ENTER", self.col_hint))
-            lines.append(("Cancel: ESC", self.col_hint_dim))
 
-        
-        profit_line = None
-        if self.cantor_item_id:
-            
-            have = base.storage.count(self.cantor_item_id)
-            qty = max(1, min(self.cantor_qty, have))
+    # draw how mutch u will earn after selling
+    def _cantor_earn_line(self, base):
+        if not self.cantor_item_id:
+            return "earn: -"
 
-            
-            price = ITEMS[self.cantor_item_id]["value"] 
-            earned = qty * price
+        have = base.storage.count(self.cantor_item_id)
+        if have <= 0:
+            return "earn: -"
 
-            profit_line = f"Selected: {self.cantor_item_id} | Qty: {qty} | Earn: {earned}g"
+        qty = self.cantor_qty if self.cantor_item_qty else 1
+        qty = max(1, min(qty, have))
 
-        for i, (txt, col) in enumerate(lines):
-            screen.blit(self.font.render(txt, True, col), (hx, hy + i * lh))
+        price = self.items.get(self.cantor_item_id, {}).get("value", 0)
+        earned = int(qty * price)
+        return f"selected: {self.cantor_item_id}  qty: {qty}/{have}  earn: {earned}g"
 
-        if profit_line:
-            screen.blit(self.font.render(profit_line, True, self.col_hint), (hx, hy + len(lines) * lh + 6))
