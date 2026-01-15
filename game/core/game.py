@@ -70,7 +70,8 @@ class Game():
 
         self.is_base_storge_open = False
 
-        self.upgrade = UpgradeSystem(self.player,self.base.storage)
+        
+        
 
         self.base_ui = BaseUI(self.width, self.height)
 
@@ -85,6 +86,7 @@ class Game():
         self.tutuorial = Tutorial(self.width,self.height)
 
         self.planet_menager = PlanetManager()
+        self.upgrade = UpgradeSystem(self.player,self.base.storage, self.planet_menager.current_id)
 
         self.shop = Shop()
 
@@ -124,7 +126,7 @@ class Game():
 
         self.player_ui.draw_player_current_stats(self.screen,self.font,self.player)
 
-        self.tutuorial.draw(self.screen)
+        self.tutuorial.draw(self.screen, self.planet_menager.current_id)
 
         pygame.display.flip()
         
@@ -255,17 +257,24 @@ class Game():
         else:
             self.tile_set = MoonTileSet()
 
+        self.player.lvl = 1
+        self.backpack_lvl = 0
+        self.mining_lvl = 0
+
+        
+
         
         self.renderer = IsoRender(self.world, self.camera, self.tile_set)
 
         
         self.hud.renderer = self.renderer
         self.invui = INVUI(self.tile_set, self.width, self.height)
+        self.tutuorial.is_visible = True
 
         # baza (po world)
         bx, by = self.world.base_pos
         self.base = Base(bx, by, 30)
-        self.upgrade = UpgradeSystem(self.player, self.base.storage)
+        self.upgrade = UpgradeSystem(self.player, self.base.storage,planet_id)
 
         # teleport gracza obok bazy
         self.player.tx = bx + 1

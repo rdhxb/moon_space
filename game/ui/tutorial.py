@@ -5,7 +5,11 @@ class Tutorial:
         self.panel_w = 900
         self.panel_h = 600
 
-        self.tutorial_img = pygame.image.load('game/data/assets/tutorial.png').convert_alpha()
+        self.tutorial_img = pygame.image.load('game/data/assets/base/base_bg.png').convert_alpha()
+        self.deafult_img_size = (900,600)
+        self.tutorial_img = pygame.transform.smoothscale(self.tutorial_img,self.deafult_img_size)
+        self.tutorial_img = self.round_corners(self.tutorial_img,24)
+
         self.x = (screen_w - self.panel_w) // 2
         self.y = (screen_h - self.panel_h) // 2
 
@@ -17,32 +21,69 @@ class Tutorial:
         self.line_gap = 6
 
         # Prosty tekst jako linie (bez wrappera)
-        self.lines = [
-            "Goal:",
-            "Collect resources, bring them to the Base, upgrade your ship, and grow stronger.",
-            "",
-            "Core loop:",
-            "1) Explore the surface and find ore.",
-            "2) Mine ore and manage your inventory.",
-            "3) Return to Base and deposit items to Storage.",
-            "4) Sell resources for Gold.",
-            "5) Upgrade Backpack and Mining to progress faster.",
-            "6) Complete missions to increase your level.",
-            "",
-            "Controls:",
-            "WASD - Move",
-            "E    - Interact (Base / Ore)",
-            "I    - Inventory",
-            "Base: P Storage | U Upgrade | Q Missions | S Shop",
-            "Shop: Arrows (select) -> SPACE (choose) -> Arrows (qty) -> ENTER (sell)",
-            "T  - Close panels or open Tutorial ",
-        ]
+        self.lines_by_planet = {
+            "moon": [
+                "Goal:",
+                "Explore, mine resources, return to the Base, and upgrade to progress faster.",
+                "",
+                "Core loop:",
+                "1) Explore and find ore.",
+                "2) Mine ore and manage your inventory.",
+                "3) Watch your fuel while traveling.",
+                "4) Return to Base to deposit items, sell for gold, and upgrade.",
+                "",
+                "Fuel:",
+                "- Fuel is consumed while traveling/exploring.",
+                "- Fuel is restored when you return to the Base.",
+                "",
+                "Moon:",
+                "- Lower risk, good for early resources.",
+                "",
+                "Controls:",
+                "WASD - Move",
+                "E    - Interact / Close panels",
+                "I    - Inventory",
+                "T    - Open/Close Tutorial",
+            ],
+            "mars": [
+                "Goal:",
+                "Explore Mars, mine resources, return to the Base, and upgrade to handle tougher terrain.",
+                "",
+                "Core loop:",
+                "1) Explore and find ore.",
+                "2) Mine ore and manage your inventory.",
+                "3) Watch your fuel while traveling.",
+                "4) Return to Base to refuel, deposit items, sell for gold, and upgrade.",
+                "",
+                "Fuel:",
+                "- Fuel is consumed while traveling/exploring.",
+                "- Fuel is restored when you return to the Base.",
+                "",
+                "Mars:",
+                "- More obstacles and richer nodes (be prepared).",
+                "",
+                "Controls:",
+                "WASD - Move",
+                "E    - Interact / Close panels",
+                "I    - Inventory",
+                "T    - Open/Close Tutorial",
+            ],
+        }
+
+        self.default_planet_id = "moon"
+
 
         self.is_visible = True
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, planet_id = None):
         if not self.is_visible:
             return
+        
+        pid = (planet_id or self.default_planet_id)
+        pid = str(pid).lower()
+
+        lines = self.lines_by_planet.get(pid, self.lines_by_planet[self.default_planet_id])
+
 
         # panel
         screen.blit(self.tutorial_img, (self.x, self.y))
@@ -54,6 +95,18 @@ class Tutorial:
         line_h = self.font.get_linesize() + self.line_gap
         max_lines = (self.panel_h - self.pad_y) // line_h
 
-        for i, line in enumerate(self.lines[:max_lines]):
+        for i, line in enumerate(lines[:max_lines]):
             surf = self.font.render(line, True, self.font_color)
             screen.blit(surf, (text_x, text_y + i * line_h))
+
+
+    def round_corners(self, surf, radius):
+        w, h = surf.get_size()
+
+        # maska: białe (255) = widoczne, przezroczyste = ucięte
+        mask = pygame.Surface((w, h), pygame.SRCALPHA)
+        pygame.draw.rect(mask, (255, 255, 255, 255), (0, 0, w, h), border_radius=radius)
+
+        out = surf.copy().convert_alpha()
+        out.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        return out

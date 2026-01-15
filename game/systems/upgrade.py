@@ -1,21 +1,53 @@
 class UpgradeSystem():
-    def __init__(self, player, storage):
+    def __init__(self, player, storage, planet_id="moon"):
         self.player = player
         self.storage = storage
+        self.planet_id = str(planet_id).lower()
 
-        self.COSTS = {"backpack": {1: {"iron_ore": 1}, 2: {"iron_ore": 20}}, "mining": {1: {"iron_ore": 1}, 2: {"iron_ore": 20}}}
+        # te same nazwy upgrade, inne materiały per planeta
+        self.COSTS_BY_PLANET = {
+            "moon": {
+                "backpack": {
+                    1: {"iron_ore": 1},
+                    2: {"iron_ore": 20},
+                },
+                "mining": {
+                    1: {"iron_ore": 1},
+                    2: {"iron_ore": 20},
+                },
+            },
+            "mars": {
+                "backpack": {
+                    1: {"hematite_ore": 3},
+                    2: {"hematite_ore": 25, "ferrosilicate_ore": 2},
+                },
+                "mining": {
+                    1: {"hematite_ore": 3},
+                    2: {"hematite_ore": 25, "ferrosilicate_ore": 2},
+                },
+            },
+        }
 
+    def set_planet(self, planet_id):
+        self.planet_id = str(planet_id).lower()
+
+    def _current_lvl(self, upg_name):
+        if upg_name == "backpack":
+            return self.player.backpack_lvl
+        if upg_name == "mining":
+            return self.player.mining_lvl
+        return None
+
+    def get_cost_table(self, upg_name):
+        # tabela kosztów tylko dla aktualnej planety
+        return self.COSTS_BY_PLANET.get(self.planet_id, {}).get(upg_name, {})
 
     def get_cost(self, upg_name):
-        if upg_name == "backpack": 
-            next_lvl = self.player.backpack_lvl + 1
-        elif upg_name == "mining":
-            next_lvl = self.player.mining_lvl + 1
-        else:
+        current = self._current_lvl(upg_name)
+        if current is None:
             return None
-
-        return self.COSTS.get(upg_name, {}).get(next_lvl) 
-
+        next_lvl = current + 1
+        return self.get_cost_table(upg_name).get(next_lvl)
 
     def can_afford(self, cost):
         if not cost:
@@ -25,20 +57,12 @@ class UpgradeSystem():
                 return False
         return True
 
-
     def try_upgrade(self, upg_name):
         cost = self.get_cost(upg_name)
         if cost is None:
             return False
 
-        # wymagany level gracza na następny poziom danego upgrade
-        if upg_name == "backpack":
-            required_lvl = self.player.backpack_lvl + 1
-        elif upg_name == "mining":
-            required_lvl = self.player.mining_lvl + 1
-        else:
-            return False
-
+        required_lvl = self._current_lvl(upg_name) + 1
         if self.player.lvl < required_lvl:
             return False
 
@@ -51,10 +75,9 @@ class UpgradeSystem():
         self.apply_upgrade(upg_name)
         return True
 
-    def apply_upgrade(self,upgrade_name):
+    def apply_upgrade(self, upgrade_name):
         if upgrade_name == "backpack":
             self.player.backpack_lvl += 1
             self.player.recalc_inventory_capacity()
-        
-        if upgrade_name == 'mining':
+        elif upgrade_name == "mining":
             self.player.mining_lvl += 1

@@ -1,3 +1,4 @@
+
 # base overlay ui with mission upgrade system inventory ect. i was wondering about bliting an img and then using bous to navigate and i think its a good idea class
 import pygame
 from ..data.items import ITEMS
@@ -5,12 +6,12 @@ class BaseUI():
     def __init__(self, screen_w, screen_h):
         self.home_title = "base"
         self.home_menu = [
-            ("[p] storage",   "deposit items"),
-            ("[u] upgrade",   "buy backpack / mining upgrades"),
-            ("[q] missions",  "show progress"),
-            ("[s] cantor",    "sell items for gold"),
-            ("[v] gold shop", "buy gold upgrades"),
-            ("[e] close",     "close / return"),
+            ("storage",   "deposit items"),
+            ("upgrade",   "buy backpack / mining upgrades"),
+            ("missions",  "show progress"),
+            ("cantor",    "sell items for gold"),
+            ("gold shop", "buy gold upgrades"),
+            ("close",     "close / return"),
         ]
         # Opisy per ekran: 1–2 linie, bez ramek
         self.state_title = {
@@ -43,6 +44,19 @@ class BaseUI():
                 "buy special upgrades using gold",
             ],
         }
+
+        self.home_selected = 0
+
+
+        self.home_actions = [
+            ("state", "storage"),
+            ("state", "upgrade"),
+            ("state", "missions"),
+            ("state", "cantor"),
+            ("state", "gold_shop"),
+            ("close", None),
+        ]
+
 
 
         self.base_bg = pygame.image.load('game/data/assets/base/base_bg.png').convert_alpha()
@@ -106,24 +120,41 @@ class BaseUI():
             return
 
         if event.type == pygame.KEYDOWN:
+            # HOME: arrow navigation
+            if self.base_state == "home":
+                n = len(self.home_menu)
+
+                if event.key == pygame.K_DOWN:
+                    self.home_selected = (self.home_selected + 1) % n
+                    return
+
+                if event.key == pygame.K_UP:
+                    self.home_selected = (self.home_selected - 1) % n
+                    return
+
+                if event.key == pygame.K_RETURN:
+                    action, value = self.home_actions[self.home_selected]
+
+                    if action == "state":
+                        self.base_state = value
+
+                        # zachowaj Twoje istniejące hooki, np. missions:
+                        if value == "storage":
+                            mission.on_ui_open("storage")
+                        elif value == "gold_shop":
+                            self.gold_selected_idx = 0
+
+                    elif action == "close":
+                        self.close()
+
+                    return
+
             if event.key == pygame.K_e:
                 if self.base_state == "home":
                     self.close()  
                 else:
                     self.base_state = "home"
-            elif event.key == pygame.K_p:
-                self.base_state = "storage"
-                mission.on_ui_open('storage')
-            elif event.key == pygame.K_u:
-                self.base_state = "upgrade"
-            elif event.key == pygame.K_q:
-                self.base_state = "missions"
-            elif event.key == pygame.K_s:
-                self.base_state = 'cantor'
-            elif event.key == pygame.K_v:
-                self.base_state = 'gold_shop'
-                self.gold_selected_idx = 0
-            
+
             if event.key == pygame.K_d and self.base_state == 'storage':
                 moved = base.deposit_all(player.inventory)
                 for item_id, qty in moved.items():
@@ -255,7 +286,7 @@ class BaseUI():
             line_h = 34
 
  
-            backpack_costs = upgrade_sys.COSTS.get("backpack", {})
+            backpack_costs = upgrade_sys.get_cost_table("backpack")
             for lvl in sorted(backpack_costs.keys()):
                 cost = backpack_costs[lvl]  
 
@@ -275,7 +306,7 @@ class BaseUI():
                 backpact_ty += line_h
 
 
-            mining_costs = upgrade_sys.COSTS.get("mining", {})
+            mining_costs = upgrade_sys.get_cost_table("mining")
             for lvl in sorted(mining_costs.keys()):
                 cost = mining_costs[lvl]  
 
@@ -390,17 +421,42 @@ class BaseUI():
         out.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
         return out
 
-    # draw home text
+    # draw home text and highlight
     def draw_home(self, screen):
         title_s = self.font_title.render(self.home_title, True, self.col_white)
         self._blit_center_x(screen, title_s, self.y + 35)
 
         start_y = self.y + 150
-        line_h = 48
-        for i, (label, _desc) in enumerate(self.home_menu):
-            s = self.font_menu.render(f'{label}: {_desc}', True, self.col_hint)
-            self._blit_center_x(screen, s, start_y + i * line_h)
-    
+        line_h = 52
+
+        cx = self.x + self.panel_w // 2
+
+        for i, (label, desc) in enumerate(self.home_menu):
+            text = f"{label}: {desc}"
+            s = self.font_menu.render(text, True, self.col_hint)
+
+            x = cx - s.get_width() // 2
+            y = start_y + i * line_h
+
+            # highlight selected
+            if i == self.home_selected:
+                pad_x = 16
+                pad_y = 8
+                hi = pygame.Surface((s.get_width() + pad_x * 2, s.get_height() + pad_y * 2), pygame.SRCALPHA)
+                hi.fill((255, 255, 255, 25))
+                screen.blit(hi, (x - pad_x, y - pad_y))
+                pygame.draw.rect(
+                    screen, (255, 255, 0),
+                    (x - pad_x, y - pad_y, s.get_width() + pad_x * 2, s.get_height() + pad_y * 2),
+                    2, border_radius=8
+                )
+
+            screen.blit(s, (x, y))
+
+        # podpowiedź na dole po lewej (opcjonalnie)
+        self._draw_footer_lines(screen, ["UP/DOWN - select   ENTER - open   E - close/return"])
+
+        
 
     # blit on the center 
     def _blit_center_x(self, screen, surf, y):
@@ -452,4 +508,3 @@ class BaseUI():
         price = self.items.get(self.cantor_item_id, {}).get("value", 0)
         earned = int(qty * price)
         return f"selected: {self.cantor_item_id}  qty: {qty}/{have}  earn: {earned}g"
-
