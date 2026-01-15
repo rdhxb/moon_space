@@ -47,8 +47,8 @@ class MarsTileSet(BaseTileSet):
     def __init__(self):
         super().__init__()
 
-        floor_sheet = pygame.image.load("game/data/assets/moon_floor.png").convert_alpha()
-        wall_sheet  = pygame.image.load("game/data/assets/moon_wall.png").convert_alpha()
+        floor_sheet = pygame.image.load("game/data/assets/mars_floor.png").convert_alpha()
+        wall_sheet  = pygame.image.load("game/data/assets/mars_wall.png").convert_alpha()
 
         self.tiles = {
             0: floor_sheet.subsurface(0, 0, self.tile_width, self.tile_floor_height),
