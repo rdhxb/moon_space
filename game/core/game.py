@@ -33,7 +33,12 @@ class Game():
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.FPS = 60
         self.clock = pygame.time.Clock()
+        
+        pygame.mixer.music.load('game/data/assets/space.mp3')
+        pygame.mixer.music.play(-1)
 
+        self.pick_up_sound = pygame.mixer.Sound('game/data/assets/item-pickup.mp3')
+        
 
         self.running = True
         self.color = (0,0,0)
@@ -145,6 +150,7 @@ class Game():
 
                     if event.key == pygame.K_e and self.near_ore and self.ore_tile is not None and self.near_obj_type is not None:
                         qty_to_pick = (1 * self.player.mining_lvl) + 1
+                        
 
                         sprite_to_item = {
                             "ore_iron": "iron_ore",
@@ -161,6 +167,7 @@ class Game():
                         if moved > 0:
                             self.world.objects_by_type[self.near_obj_type].remove(self.ore_tile)
                             self.mission.on_item_collected(item_id, qty_to_pick)
+                            self.pick_up_sound.play()
                         else:
                             print("Brak miejsca w inventory")
 
@@ -258,11 +265,9 @@ class Game():
             self.tile_set = MoonTileSet()
 
         self.player.lvl = 1
-        self.backpack_lvl = 0
-        self.mining_lvl = 0
-
-        
-
+        self.player.backpack_lvl = 0
+        self.player.mining_lvl = 0
+        self.player.recalc_inventory_capacity()
         
         self.renderer = IsoRender(self.world, self.camera, self.tile_set)
 

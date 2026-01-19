@@ -14,7 +14,7 @@ class INVUI():
             # mars ores
             "hematite_ore": "game/data/assets/Red_crystal4.png",    
             "ferrosilicate_ore": "game/data/assets/Violet_crystal4.png",
-            "sulfide_ore": "game/data/assets/green_crystal4.png",
+            "sulfide_ore": "game/data/assets/Yellow-green_crystal4.png",
         }
 
         self.font = pygame.font.SysFont("Comic Sans MS", 22, italic=True)
@@ -71,4 +71,3 @@ class INVUI():
             screen.blit(self.font.render(f'{item_qty}x', False, (191, 9, 48)), (slot_x + 6, slot_y + slot_h - 24))
 
         return rects
-
