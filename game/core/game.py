@@ -1,4 +1,6 @@
 import pygame
+import json
+from pathlib import Path
 from ..entities.ship import Ship
 from ..world.world_map import WorldMap
 from ..render.TileSets import MoonTileSet, MarsTileSet
@@ -23,6 +25,8 @@ from ..systems.planet_menageer import PlanetManager
 from ..world.planets import build_world
 
 from ..systems.shop import Shop
+
+from ..systems.save_system import SaveSystem
 pygame.init()
 
 class Game():
@@ -94,6 +98,7 @@ class Game():
         self.upgrade = UpgradeSystem(self.player,self.base.storage, self.planet_menager.current_id)
 
         self.shop = Shop()
+        self.save_system = SaveSystem()
 
         self.near_obj_tile = None
         self.near_obj_type = None 
@@ -104,6 +109,8 @@ class Game():
             "ferrosilicate_ore",
             "sulfide_vein_ore",
         }
+
+
 
 
 
@@ -143,6 +150,14 @@ class Game():
 
             if event.type == pygame.KEYDOWN:
                 if self.game_state == 'play':
+                    if event.key == pygame.K_F5:
+                        self.save_system.save_data(self.player.get_state(), self.base.get_state(), self.mission.get_state(), self.shop.get_state(), self.planet_menager.get_state())
+                    if event.key == pygame.K_F8:
+                        self.load_planet_and_rebuild_world()
+                        self.save_system.load_data_into(self.player, self.base, self.mission, self.shop)
+                        print("WORLD:", getattr(self.world, "planet_id", None), "PM:", self.planet_menager.current_id)
+
+
                     if event.key == pygame.K_e and self.near_base:
                         self.game_state = 'base_menu'
                         self.base_ui.open()
@@ -309,6 +324,35 @@ class Game():
         self.mission = MissionTracker(self.player)
         self.mission.set_planet(planet_id)
         self.planet_menager.set_current(planet_id)
+
+
+
+    def load_planet_and_rebuild_world(self):
+        path = Path("game/data/save/planet.json")
+        if not path.exists():
+            return
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            return
+
+        planet_section = data.get("planet")
+        if not isinstance(planet_section, dict):
+            return
+
+        planet_id = planet_section.get("current_id")
+        if not planet_id:
+            return
+
+        planet_id = str(planet_id)
+
+        self.planet_menager.unlocked.add(planet_id)      
+        self.planet_menager.current_id = planet_id   
+
+        self.load_planet(planet_id)
+
 
 
     # run the game just a funct

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "shop": {
+    "prices": {
+      "speed_upgrade": 10,
+      "fuel_upg": 10
+    }
+  }
+}

@@ -109,6 +109,52 @@ class Inventory:
             self.capacity = new_capacity
 
         return True
+    
+    def get_state(self):
+        slots_out = []
+        for s in self.slots:
+            if s is None:
+                slots_out.append(None)
+            else:
+                slots_out.append({
+                    "item_id": s.item_id,
+                    "qty": int(s.qty),
+                })
+
+        return {
+            "capacity": int(self.capacity),
+            "slots": slots_out,
+        }
+
+    def set_state(self, state: dict):
+        if not isinstance(state, dict):
+            return
+
+        cap = int(state.get("capacity", self.capacity))
+        if cap < 0:
+            cap = 0
+
+        self.capacity = cap
+        self.slots = [None] * self.capacity
+
+        slots_in = state.get("slots", [])
+        if not isinstance(slots_in, list):
+            return
+
+        for i in range(min(self.capacity, len(slots_in))):
+            row = slots_in[i]
+            if row is None:
+                continue
+            if not isinstance(row, dict):
+                continue
+
+            item_id = row.get("item_id")
+            qty = int(row.get("qty", 0))
+            if item_id is None or qty <= 0:
+                continue
+
+            self.slots[i] = ItemStack(item_id, qty)
+
 
 
 

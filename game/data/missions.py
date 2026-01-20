@@ -96,16 +96,6 @@ MISSIONS = {
         "is_compleated": False,
         "planet": "mars",
     },
-
-    "m_mars_open_storage": {
-        "title": "Marsjański magazyn",
-        "desc": "Otwórz magazyn w bazie po przylocie na Marsa.",
-        "type": "open_ui",
-        "target": 1,
-        "params": {"ui": "storage"},
-        "is_compleated": False,
-        "planet": "mars",
-    },
 }
 
 

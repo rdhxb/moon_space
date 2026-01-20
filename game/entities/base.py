@@ -41,4 +41,22 @@ class Base():
         return moved_by_item
 
 
+    def get_state(self):
+        return {
+            "tx": float(self.tx),
+            "ty": float(self.ty),
+            "storage": self.storage.get_state(),
+        }
+
+    def set_state(self, state: dict):
+        if not isinstance(state, dict):
+            return
+
+        self.tx = float(state.get("tx", self.tx))
+        self.ty = float(state.get("ty", self.ty))
+
+        storage_state = state.get("storage")
+        if isinstance(storage_state, dict) and hasattr(self.storage, "set_state"):
+            self.storage.set_state(storage_state)
+
         

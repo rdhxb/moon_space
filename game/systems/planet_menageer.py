@@ -31,3 +31,29 @@ class PlanetManager:
             return False
         self.current_id = planet_id
         return True
+    
+
+    def get_state(self):
+        return {
+            "current_id": self.current_id,
+            "unlocked": list(self.unlocked),
+        }
+
+    def set_state(self, state: dict):
+        if not isinstance(state, dict):
+            return
+
+        unlocked_in = state.get("unlocked")
+        if isinstance(unlocked_in, list) and unlocked_in:
+            self.unlocked = set(str(x) for x in unlocked_in)
+        else:
+            self.unlocked = {"moon"}
+
+        cur = state.get("current_id", "moon")
+        cur = str(cur)
+
+        if cur in self.unlocked:
+            self.current_id = cur
+        else:
+            self.current_id = "moon"
+

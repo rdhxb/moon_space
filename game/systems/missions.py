@@ -92,6 +92,65 @@ class MissionTracker:
     def set_planet(self, planet_id: str):
         self.current_planet = planet_id
 
+
+    def get_state(self):
+        prog_out = {}
+        for mission_id, value in self.progress.items():
+            try:
+                prog_out[mission_id] = float(value)
+            except Exception:
+                prog_out[mission_id] = 0
+
+        return {
+            "progress": prog_out,
+            "completed": list(self.completed),
+            "compleated_count": int(self.compleated_count),
+            "current_planet": str(self.current_planet),
+        }
+
+    def set_state(self, state: dict):
+        if not isinstance(state, dict):
+            return
+
+        prog_in = state.get("progress", {})
+        if isinstance(prog_in, dict):
+            new_progress = {mission_id: 0 for mission_id in self.missions}
+            for mission_id, val in prog_in.items():
+                if mission_id in new_progress:
+                    try:
+                        new_progress[mission_id] = float(val)
+                    except Exception:
+                        new_progress[mission_id] = 0
+            self.progress = new_progress
+        else:
+            self.progress = {mission_id: 0 for mission_id in self.missions}
+
+        comp_in = state.get("completed", [])
+        if isinstance(comp_in, list):
+            self.completed = {mission_id for mission_id in comp_in if mission_id in self.missions}
+        else:
+            self.completed = set()
+
+        self.compleated_count = int(state.get("compleated_count", len(self.completed)))
+        self.current_planet = str(state.get("current_planet", self.current_planet))
+
+        for mission_id, m in self.missions.items():
+            m["is_compleated"] = (mission_id in self.completed)
+
+        for mission_id, m in self.missions.items():
+            target = m.get("target", 0)
+            try:
+                if self.progress[mission_id] > target:
+                    self.progress[mission_id] = target
+            except Exception:
+                self.progress[mission_id] = 0
+
+            if self.progress[mission_id] >= target:
+                self.progress[mission_id] = target
+                self.completed.add(mission_id)
+                m["is_compleated"] = True
+
+
     def debug_msg(self):
         print(self.progress)
         print(self.completed)

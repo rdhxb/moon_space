@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "player": {
+    "tx": 11.215825214724777,
+    "ty": 14.998996218401762,
+    "lvl": 1,
+    "backpack_lvl": 0,
+    "mining_lvl": 0,
+    "gold": 10000,
+    "max_fuel": 10.0,
+    "fuel": 9.844999999999994,
+    "inventory": {
+      "capacity": 1,
+      "slots": [
+        null
+      ]
+    }
+  }
+}

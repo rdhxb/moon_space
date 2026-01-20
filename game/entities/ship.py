@@ -49,7 +49,7 @@ class Ship():
         # player overall level need for upgrade and tings like this earnin by doing qests 
         self.lvl = 1
 
-        self.gold: int = 0
+        self.gold: int = 10000
         self._rot_cache = {}          
         self._last_angle_step = None
         self._angle_step_deg = 3    
@@ -179,3 +179,53 @@ class Ship():
     def recalc_inventory_capacity(self):
         self.inv_slots = (1 * self.backpack_lvl) + 1
         self.inventory.resize(self.inv_slots)
+
+
+    def get_state(self):
+        return {
+            "tx": float(self.tx),
+            "ty": float(self.ty),
+            "lvl": int(self.lvl),
+            "backpack_lvl": int(self.backpack_lvl),
+            "mining_lvl": int(self.mining_lvl),
+            "gold": int(self.gold),
+            "max_fuel": float(self.max_fuel),
+            "fuel": float(self.fuel),
+            "inventory": self.inventory.get_state(),
+
+        }
+
+    def set_state(self, state: dict):
+        if not isinstance(state, dict):
+            return
+        self.tx = float(state.get("tx", self.tx))
+        self.ty = float(state.get("ty", self.ty))
+
+        self.lvl = int(state.get("lvl", self.lvl))
+        self.backpack_lvl = int(state.get("backpack_lvl", self.backpack_lvl))
+        self.mining_lvl = int(state.get("mining_lvl", self.mining_lvl))
+        self.gold = int(state.get("gold", self.gold))
+
+        self.max_fuel = float(state.get("max_fuel", self.max_fuel))
+        self.fuel = float(state.get("fuel", self.max_fuel))
+
+        if self.max_fuel < 0:
+            self.max_fuel = 0
+        if self.fuel < 0:
+            self.fuel = 0
+        if self.fuel > self.max_fuel:
+            self.fuel = self.max_fuel
+
+        self.tile_x = int(self.tx)
+        self.tile_y = int(self.ty)
+
+        self.recalc_inventory_capacity()
+
+        inv_state = state.get("inventory")
+        if isinstance(inv_state, dict):
+            self.inventory.set_state(inv_state)
+
+        self.vx = 0.0
+        self.vy = 0.0
+
+        self.speed = 2 if self.fuel <= 0 else self.base_speed

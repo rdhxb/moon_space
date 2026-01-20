@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "base": {
+    "tx": 15.0,
+    "ty": 15.0,
+    "storage": {
+      "capacity": 30,
+      "slots": [
+        {
+          "item_id": "hematite_ore",
+          "qty": 5
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  }
+}

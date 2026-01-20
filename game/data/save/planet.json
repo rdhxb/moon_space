@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "planet": {
+    "current_id": "mars",
+    "unlocked": [
+      "mars",
+      "moon"
+    ]
+  }
+}

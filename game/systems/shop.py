@@ -6,7 +6,7 @@ class Shop():
     def buy_upgrade(self, upg_name, player):     
 
         if upg_name == 'speed_upgrade' and self.can_afford(player, upg_name):
-            player.speed += self.get_value(upg_name)
+            player.base_speed += self.get_value(upg_name)
             player.gold -= self.get_price(upg_name)
             self.make_upg_more_expensive(upg_name)
             # print(f'player speed = {player.speed}')
@@ -41,3 +41,32 @@ class Shop():
         if current_p_gold - price >= 0:
             return True
         return False
+    
+
+    def get_state(self):
+        prices = {}
+        for name, upg in self.upgrades.items():
+            if isinstance(upg, dict):
+                prices[name] = int(upg.get("price", 0))
+
+        return {
+            "prices": prices
+        }
+
+    def set_state(self, state: dict):
+        if not isinstance(state, dict):
+            return
+
+        self.upgrades = SHOP
+
+        prices = state.get("prices", {})
+        if not isinstance(prices, dict):
+            return
+
+        for name, price in prices.items():
+            if name not in self.upgrades:
+                continue
+            try:
+                self.upgrades[name]["price"] = int(price)
+            except Exception:
+                pass

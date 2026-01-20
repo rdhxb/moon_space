@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "mission": {
+    "progress": {
+      "m_collect_iron_5": 0.0,
+      "m_collect_iron_30": 0.0,
+      "m_open_storage": 1.0,
+      "m_deposit_iron_20": 0.0,
+      "m_travel_200": 87.86789722450635,
+      "m_mars_collect_hematite_10": 5.0,
+      "m_mars_collect_ferrosilicate_8": 0.0,
+      "m_mars_collect_sulfide_5": 0.0,
+      "m_mars_deposit_hematite_15": 5.0,
+      "m_mars_travel_600": 87.86789722450635
+    },
+    "completed": [
+      "m_open_storage"
+    ],
+    "compleated_count": 1,
+    "current_planet": "mars"
+  }
+}
