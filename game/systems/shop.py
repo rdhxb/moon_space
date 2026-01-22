@@ -9,15 +9,13 @@ class Shop():
             player.base_speed += self.get_value(upg_name)
             player.gold -= self.get_price(upg_name)
             self.make_upg_more_expensive(upg_name)
-            # print(f'player speed = {player.speed}')
-            # print(f'Price {self.get_price("speed_upgrade")}')
+
 
         if upg_name == 'fuel_upg' and self.can_afford(player, upg_name):
             player.max_fuel += self.get_value(upg_name)
             player.gold -= self.get_price(upg_name)
             self.make_upg_more_expensive(upg_name)
-            # print(f'player max_fuel = {player.max_fuel}')
-            # print(f'player fuel = {player.fuel}')
+
 
 
     def get_price(self,upg_name):

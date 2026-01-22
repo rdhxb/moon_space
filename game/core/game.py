@@ -27,13 +27,17 @@ from ..world.planets import build_world
 from ..systems.shop import Shop
 
 from ..systems.save_system import SaveSystem
+from ..ui.start_screen import StartScreen
+from ..ui.save_load_screen import SaveLoadScreen
+
+
 pygame.init()
 
 class Game():
     # init the variables 
     def __init__(self):
-        self.width = 1920     
-        self.height = 1080
+        self.width = 1366     
+        self.height = 768
         self.screen = pygame.display.set_mode((self.width, self.height))
         self.FPS = 60
         self.clock = pygame.time.Clock()
@@ -60,7 +64,7 @@ class Game():
 
         self.renderer = IsoRender(self.world, self.camera, self.tile_set)
 
-        self.game_state = 'play'
+        self.game_state = 'start'
         self.near_base = False
         self.base_interaction_radius = 2.5
 
@@ -103,6 +107,11 @@ class Game():
         self.near_obj_tile = None
         self.near_obj_type = None 
 
+        self.start_screen = StartScreen(self.width, self.height)
+        self.save_load_screen = SaveLoadScreen(self.width, self.height)
+
+
+
         self.mineable_types = {
             "ore_iron",
             "red_hematite_ore",
@@ -117,14 +126,27 @@ class Game():
 
     # draw everything on the screen like player world ect. 
     def draw(self):
+        
         self.screen.fill(self.color)
+        if self.game_state == "start":
+            self.start_screen.draw(self.screen)
+            pygame.display.flip()
+            return
+        if self.game_state == "save_load":
+            self.save_load_screen.draw(self.screen)
+            pygame.display.flip()
+            return
+
+        
         self.renderer.draw_world(self.screen)
+        
         self.renderer.draw_objects(self.screen, self.world.objects_by_type)
 
         self.player.draw(self.screen)
         
         self.renderer.draw_base(self.screen)
-        self.hud.draw(self.screen, self.game_state, self.near_base)
+        self.hud.draw(self.screen, self.game_state, self.near_base, self.planet_menager, self.mission)
+
         
         if self.near_ore:
             self.renderer.draw_ore_hint(self.screen, self.font, self.ore_tile, self.camera)
@@ -140,6 +162,10 @@ class Game():
 
         self.tutuorial.draw(self.screen, self.planet_menager.current_id)
 
+        
+
+
+
         pygame.display.flip()
         
 
@@ -149,13 +175,46 @@ class Game():
                 self.running = False
 
             if event.type == pygame.KEYDOWN:
-                if self.game_state == 'play':
-                    if event.key == pygame.K_F5:
-                        self.save_system.save_data(self.player.get_state(), self.base.get_state(), self.mission.get_state(), self.shop.get_state(), self.planet_menager.get_state())
-                    if event.key == pygame.K_F8:
+                if self.game_state == "start":
+                    action = self.start_screen.handle_event(event)
+                    if action == "new_game":
+                        self.game_state = "play"
+                    elif action == "load_save":
                         self.load_planet_and_rebuild_world()
                         self.save_system.load_data_into(self.player, self.base, self.mission, self.shop)
-                        print("WORLD:", getattr(self.world, "planet_id", None), "PM:", self.planet_menager.current_id)
+                        self.game_state = "play"
+                    elif action == "quit":
+                        self.running = False
+                    return
+                
+                if self.game_state == "save_load":
+                    action = self.save_load_screen.handle_event(event)
+
+                    if action == "save_game":
+                        self.save_system.save_data(
+                            self.player.get_state(),
+                            self.base.get_state(),
+                            self.mission.get_state(),
+                            self.shop.get_state(),
+                            self.planet_menager.get_state()
+                        )
+
+                    elif action == "load_game":
+                        self.load_planet_and_rebuild_world()
+                        self.save_system.load_data_into(self.player, self.base, self.mission, self.shop)
+
+                    elif action == "back":
+                        self.game_state = "play"   
+
+                    return
+
+
+                if self.game_state == "play":
+                    if event.key == pygame.K_ESCAPE:
+                        self.save_load_screen.reset()
+                        self.game_state = "save_load"
+                        return
+
 
 
                     if event.key == pygame.K_e and self.near_base:
@@ -283,6 +342,9 @@ class Game():
         self.player.backpack_lvl = 0
         self.player.mining_lvl = 0
         self.player.recalc_inventory_capacity()
+        if hasattr(self.player, "inventory") and hasattr(self.player.inventory, "slots"):
+            self.player.inventory.slots = [None] * len(self.player.inventory.slots)
+
         
         self.renderer = IsoRender(self.world, self.camera, self.tile_set)
 

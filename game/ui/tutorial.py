@@ -17,10 +17,9 @@ class Tutorial:
         self.font_color = (240, 240, 240)
 
         self.pad_x = 60
-        self.pad_y = 120
+        self.pad_y = 40
         self.line_gap = 6
 
-        # Prosty tekst jako linie (bez wrappera)
         self.lines_by_planet = {
             "moon": [
                 "Goal:",
@@ -44,6 +43,10 @@ class Tutorial:
                 "E    - Interact / Close panels",
                 "I    - Inventory",
                 "T    - Open/Close Tutorial",
+                "",
+                "You can save load game by pressing esc button and the enter"
+                "",
+                "To go to the nex planet u had to do 5 quests"
             ],
             "mars": [
                 "Goal:",
@@ -67,6 +70,8 @@ class Tutorial:
                 "E    - Interact / Close panels",
                 "I    - Inventory",
                 "T    - Open/Close Tutorial",
+                "",
+                "You can save load game by pressing esc button and the enter"
             ],
         }
 
