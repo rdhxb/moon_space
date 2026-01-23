@@ -39,7 +39,7 @@ class Ship():
         self.idel_speed_in_move = 5.0
         # ile px gora dol
         self.idle_amplitude = 4.0
-        # backpack level (inv slots)
+        # backpack level (
         self.backpack_lvl = 0
         self.inv_slots = (1 * self.backpack_lvl) + 1
         # mining level
@@ -49,7 +49,7 @@ class Ship():
         # player overall level need for upgrade and tings like this earnin by doing qests 
         self.lvl = 1
 
-        self.gold: int = 10000
+        self.gold: int = 0
         self._rot_cache = {}          
         self._last_angle_step = None
         self._angle_step_deg = 3    

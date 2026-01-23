@@ -233,7 +233,7 @@ class Game():
                             "sulfide_vein_ore": "sulfide_ore",
                         }
 
-                        item_id = sprite_to_item.get(self.near_obj_type, "iron_ore")
+                        item_id = sprite_to_item.get(self.near_obj_type)
 
                         leftover = self.player.inventory.add(item_id, qty_to_pick)
                         moved = qty_to_pick - leftover

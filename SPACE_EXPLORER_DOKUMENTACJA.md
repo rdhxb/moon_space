@@ -214,7 +214,7 @@ Poniższa sekcja opisuje zawartość folderów zgodnie z aktualną strukturą pr
 - `items.py` — `ITEMS`: definicje itemów (nazwa, kategoria, stack_max, value, opis).
 - `missions.py` — `MISSIONS`: definicje misji (importowane przez MissionTracker).
 - `shop.py` — `SHOP`: definicje ulepszeń w Gold Shop (importowane przez Shop).
-- `assets/` — grafiki i audio.
+- `assets/` — grafiki i audio. (https://itch.io/game-assets/free/tag-top-down)
 - `save/` — JSON-y zapisów.
 
 ---
